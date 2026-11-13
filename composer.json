@@ -1,0 +1,32 @@
+{
+	"name": "soderlind/loupe-semantic-search",
+	"description": "Semantic retrieval and hybrid search for Loupe Search, using embeddings from WordPress 7 AI Connectors.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=8.3"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^12",
+		"brain/monkey": "^2.6"
+	},
+	"autoload": {
+		"psr-4": {
+			"Soderlind\\Plugin\\LoupeSemanticSearch\\": "includes/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Soderlind\\Plugin\\LoupeSemanticSearch\\Tests\\": "tests/php/"
+		}
+	},
+	"config": {
+		"platform": {
+			"php": "8.3.0"
+		},
+		"sort-packages": true
+	},
+	"scripts": {
+		"test": "phpunit"
+	}
+}

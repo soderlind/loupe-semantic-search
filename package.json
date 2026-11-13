@@ -1,0 +1,10 @@
+{
+  "name": "loupe-semantic-search",
+  "private": true,
+  "scripts": {
+    "test:acceptance": "playwright test --config tests/acceptance/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0"
+  }
+}
