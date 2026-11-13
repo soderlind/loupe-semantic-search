@@ -35,6 +35,12 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase {
 				return true;
 			}
 		);
+		Functions\when( 'delete_transient' )->alias(
+			function ( $key ) {
+				unset( $this->transients[ $key ] );
+				return true;
+			}
+		);
 		Functions\when( 'get_transient' )->alias( fn ( $key ) => $this->transients[ $key ] ?? false );
 		Functions\when( 'set_transient' )->alias(
 			function ( $key, $value ) {

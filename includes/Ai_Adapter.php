@@ -49,8 +49,9 @@ class Ai_Adapter {
 	 *
 	 * Listing models is an HTTP request per provider. The AI client caches it in the
 	 * object cache, which does not outlive the request without a persistent object
-	 * cache, so the list is kept in a transient for 12 hours. The transient key
-	 * changes when a connector is added, removed, connected or disconnected.
+	 * cache, so the list is kept in a transient for 12 hours, or 5 minutes when a
+	 * provider failed so it is asked again soon. The transient key changes when a
+	 * connector is added, removed, connected or disconnected.
 	 *
 	 * @param bool $refresh Ask the providers again instead of using the saved list.
 	 * @return list<array{provider:string,provider_name:string,model:string,model_name:string}>
@@ -68,9 +69,11 @@ class Ai_Adapter {
 			}
 		}
 
-		$models = $this->fetch_embedding_models();
-		if ( ! empty( $models ) ) {
-			set_transient( $key, $models, 12 * HOUR_IN_SECONDS );
+		[ 'models' => $models, 'complete' => $complete ] = $this->fetch_embedding_models();
+		if ( empty( $models ) ) {
+			delete_transient( $key );
+		} else {
+			set_transient( $key, $models, $complete ? 12 * HOUR_IN_SECONDS : 5 * MINUTE_IN_SECONDS );
 		}
 		return $models;
 	}
@@ -93,12 +96,14 @@ class Ai_Adapter {
 	/**
 	 * Ask each connected provider for its embedding models.
 	 *
-	 * @return list<array{provider:string,provider_name:string,model:string,model_name:string}>
+	 * @return array{models:list<array{provider:string,provider_name:string,model:string,model_name:string}>,complete:bool}
+	 *         `complete` is false when a provider failed.
 	 */
 	protected function fetch_embedding_models(): array {
 		$registry     = AiClient::defaultRegistry();
 		$requirements = new ModelRequirements( [ CapabilityEnum::embeddingGeneration() ], [] );
 		$models       = [];
+		$complete     = true;
 
 		foreach ( array_keys( \WordPress\AI\get_ai_connectors() ) as $provider_id ) {
 			try {
@@ -117,11 +122,11 @@ class Ai_Adapter {
 					];
 				}
 			} catch ( \Throwable $e ) {
-				continue;
+				$complete = false;
 			}
 		}
 
-		return $models;
+		return [ 'models' => $models, 'complete' => $complete ];
 	}
 
 	/**
