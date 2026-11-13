@@ -20,6 +20,7 @@ class Settings_Page {
 
 	public const SLUG   = 'loupe-semantic-search';
 	public const ACTION = 'loupe_semantic_backfill';
+	public const REFRESH_MODELS = 'loupe_semantic_refresh_models';
 	public const TAB    = 'semantic';
 
 	/**
@@ -50,6 +51,7 @@ class Settings_Page {
 		add_filter( 'loupe_search_settings_tabs', [ $this, 'add_tab' ] );
 		add_action( 'admin_page_access_denied', [ $this, 'redirect_old_page' ] );
 		add_action( 'admin_post_' . self::ACTION, [ $this, 'handle_backfill' ] );
+		add_action( 'admin_post_' . self::REFRESH_MODELS, [ $this, 'handle_refresh_models' ] );
 		add_filter( 'plugin_action_links_' . plugin_basename( \Soderlind\Plugin\LoupeSemanticSearch\FILE ), [ $this, 'action_links' ] );
 	}
 
@@ -123,6 +125,21 @@ class Settings_Page {
 		};
 
 		wp_safe_redirect( self::url( [ 'backfill' => $ok ? $op : 'failed' ] ) );
+		exit;
+	}
+
+	/**
+	 * Ask the providers for their embedding models again.
+	 */
+	public function handle_refresh_models(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to do this.', 'loupe-semantic-search' ), 403 );
+		}
+		check_admin_referer( self::REFRESH_MODELS );
+
+		$this->ai->embedding_models( true );
+
+		wp_safe_redirect( self::url( [ 'models' => 'refreshed' ] ) );
 		exit;
 	}
 
@@ -261,6 +278,7 @@ class Settings_Page {
 					[ 'a' => [ 'href' => [] ] ]
 				)
 			);
+			$this->render_refresh_models_link();
 			return;
 		}
 
@@ -280,6 +298,20 @@ class Settings_Page {
 			);
 		}
 		echo '</select>';
+		$this->render_refresh_models_link();
+	}
+
+	/**
+	 * Link that refreshes the saved model list.
+	 */
+	private function render_refresh_models_link(): void {
+		$url = wp_nonce_url( add_query_arg( 'action', self::REFRESH_MODELS, admin_url( 'admin-post.php' ) ), self::REFRESH_MODELS );
+		printf(
+			'<p class="description">%s <a href="%s">%s</a></p>',
+			esc_html__( 'The model list is saved for 12 hours.', 'loupe-semantic-search' ),
+			esc_url( $url ),
+			esc_html__( 'Refresh model list', 'loupe-semantic-search' )
+		);
 	}
 
 	/**
@@ -314,6 +346,10 @@ class Settings_Page {
 		};
 		if ( '' !== $text ) {
 			printf( '<div class="notice notice-%s is-dismissible"><p>%s</p></div>', 'failed' === $result ? 'error' : 'success', esc_html( $text ) );
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
+		if ( isset( $_GET['models'] ) && 'refreshed' === sanitize_key( wp_unslash( $_GET['models'] ) ) ) {
+			printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html__( 'Model list refreshed.', 'loupe-semantic-search' ) );
 		}
 	}
 
