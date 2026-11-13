@@ -10,7 +10,7 @@
  * Plugin Name:       Loupe Semantic Search
  * Plugin URI:        https://github.com/soderlind/loupe-semantic-search
  * Description:       Adds semantic retrieval and hybrid (keyword + meaning) search to Loupe Search, using embeddings from a provider connected under Settings → Connectors.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Author:            Per Soderlind
  * Author URI:        https://soderlind.no
  * License:           GPL-2.0+
@@ -26,7 +26,7 @@ namespace Soderlind\Plugin\LoupeSemanticSearch;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 const FILE    = __FILE__;
 
 spl_autoload_register(

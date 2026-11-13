@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Loupe Semantic Search 0.1.0\n"
+"Project-Id-Version: Loupe Semantic Search 0.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/loupe-semantic-search\n"
 "Last-Translator: Per Soderlind\n"
 "Language-Team: Norwegian Bokmål\n"
@@ -97,213 +97,214 @@ msgstr "Innleggstyper det skal søkes i. Standard er alle offentlige, indekserte
 msgid "The query is empty."
 msgstr "Spørringen er tom."
 
-#: includes/Admin/Settings_Page.php:104
+#: includes/Admin/Settings_Page.php:106
 msgid "Settings"
 msgstr "Innstillinger"
 
-#: includes/Admin/Settings_Page.php:113
+#: includes/Admin/Settings_Page.php:115
+#: includes/Admin/Settings_Page.php:136
 msgid "You are not allowed to do this."
 msgstr "Du har ikke tilgang til å gjøre dette."
 
 #. translators: %s: Connectors screen URL.
-#: includes/Admin/Settings_Page.php:148
+#: includes/Admin/Settings_Page.php:165
 #, php-format
 msgid "Semantic search needs the AI plugin (1.5.0 or later) and a provider that offers embeddings. <a href=\"%s\">Connect a provider</a>."
 msgstr "Semantisk søk krever AI-utvidelsen (1.5.0 eller nyere) og en leverandør som tilbyr embeddinger. <a href=\"%s\">Koble til en leverandør</a>."
 
-#: includes/Admin/Settings_Page.php:160
+#: includes/Admin/Settings_Page.php:177
 msgid "Embedding model"
 msgstr "Embeddingmodell"
 
-#: includes/Admin/Settings_Page.php:163
+#: includes/Admin/Settings_Page.php:180
 msgid "Model"
 msgstr "Modell"
 
-#: includes/Admin/Settings_Page.php:166
+#: includes/Admin/Settings_Page.php:183
 msgid "Changing the model re-embeds all content and deletes the old model’s vectors when nothing else uses them."
 msgstr "Bytte av modell embedder alt innhold på nytt og sletter den gamle modellens vektorer når ingenting annet bruker dem."
 
-#: includes/Admin/Settings_Page.php:170
+#: includes/Admin/Settings_Page.php:187
 msgid "Dimensions"
 msgstr "Dimensjoner"
 
-#: includes/Admin/Settings_Page.php:173
+#: includes/Admin/Settings_Page.php:190
 msgid "0 uses the model default. Only for models that support shortened embeddings."
 msgstr "0 bruker modellens standard. Bare for modeller som støtter forkortede embeddinger."
 
-#: includes/Admin/Settings_Page.php:178
+#: includes/Admin/Settings_Page.php:195
 msgid "Hybrid search"
 msgstr "Hybridsøk"
 
-#: includes/Admin/Settings_Page.php:181
+#: includes/Admin/Settings_Page.php:198
 msgid "Use on"
 msgstr "Bruk på"
 
-#: includes/Admin/Settings_Page.php:184
+#: includes/Admin/Settings_Page.php:201
 msgid "Front-end search (and the loupe-search/search ability)"
 msgstr "Søk på nettstedet (og evnen loupe-search/search)"
 
-#: includes/Admin/Settings_Page.php:185
+#: includes/Admin/Settings_Page.php:202
 msgid "REST search endpoint (Loupe Search Block)"
 msgstr "REST-søkeendepunktet (Loupe Search Block)"
 
-#: includes/Admin/Settings_Page.php:186
+#: includes/Admin/Settings_Page.php:203
 msgid "Abilities: loupe-semantic/retrieve and loupe-semantic/search"
 msgstr "Evner: loupe-semantic/retrieve og loupe-semantic/search"
 
-#: includes/Admin/Settings_Page.php:191
+#: includes/Admin/Settings_Page.php:208
 msgid "Weights"
 msgstr "Vekter"
 
-#: includes/Admin/Settings_Page.php:193
+#: includes/Admin/Settings_Page.php:210
 msgid "Keyword"
 msgstr "Nøkkelord"
 
-#: includes/Admin/Settings_Page.php:196
+#: includes/Admin/Settings_Page.php:213
 msgid "Semantic"
 msgstr "Semantisk"
 
-#: includes/Admin/Settings_Page.php:198
+#: includes/Admin/Settings_Page.php:215
 msgid "Relative weight of each ranking in reciprocal rank fusion."
 msgstr "Relativ vekt for hver rangering i resiprok rangfusjon."
 
-#: includes/Admin/Settings_Page.php:202
+#: includes/Admin/Settings_Page.php:219
 msgid "Minimum similarity"
 msgstr "Minste likhet"
 
-#: includes/Admin/Settings_Page.php:205
+#: includes/Admin/Settings_Page.php:222
 msgid "Semantic matches below this cosine similarity are ignored."
 msgstr "Semantiske treff under denne cosinuslikheten ignoreres."
 
-#: includes/Admin/Settings_Page.php:210
+#: includes/Admin/Settings_Page.php:227
 msgid "Limits"
 msgstr "Grenser"
 
-#: includes/Admin/Settings_Page.php:213
+#: includes/Admin/Settings_Page.php:230
 msgid "Per visitor"
 msgstr "Per besøkende"
 
-#: includes/Admin/Settings_Page.php:216
+#: includes/Admin/Settings_Page.php:233
 msgid "query embeddings per minute per IP address (0 = no limit)"
 msgstr "spørringsembeddinger per minutt per IP-adresse (0 = ingen grense)"
 
-#: includes/Admin/Settings_Page.php:220
+#: includes/Admin/Settings_Page.php:237
 msgid "Daily cap"
 msgstr "Daglig tak"
 
 #. translators: %d: query embeddings used today.
-#: includes/Admin/Settings_Page.php:226
+#: includes/Admin/Settings_Page.php:243
 #, php-format
 msgid "query embeddings per day for the whole site (0 = no limit). Used today: %d."
 msgstr "spørringsembeddinger per dag for hele nettstedet (0 = ingen grense). Brukt i dag: %d."
 
-#: includes/Admin/Settings_Page.php:230
+#: includes/Admin/Settings_Page.php:247
 msgid "Cached queries do not count. When a limit is reached, search falls back to keyword results."
 msgstr "Hurtigbufrede spørringer telles ikke. Når en grense er nådd, faller søket tilbake til nøkkelordtreff."
 
 #. translators: %s: Connectors screen URL.
-#: includes/Admin/Settings_Page.php:258
+#: includes/Admin/Settings_Page.php:275
 #, php-format
 msgid "No connected provider offers embedding models. <a href=\"%s\">Connect a provider</a>."
 msgstr "Ingen tilkoblet leverandør tilbyr embeddingmodeller. <a href=\"%s\">Koble til en leverandør</a>."
 
-#: includes/Admin/Settings_Page.php:269
+#: includes/Admin/Settings_Page.php:287
 msgid "— Select a model —"
 msgstr "— Velg en modell —"
 
 #. translators: %s: provider::model.
-#: includes/Admin/Settings_Page.php:272
+#: includes/Admin/Settings_Page.php:290
 #, php-format
 msgid "%s (not available)"
 msgstr "%s (ikke tilgjengelig)"
 
-#: includes/Admin/Settings_Page.php:309
+#: includes/Admin/Settings_Page.php:341
 msgid "Backfill started."
 msgstr "Etterfylling startet."
 
-#: includes/Admin/Settings_Page.php:310
+#: includes/Admin/Settings_Page.php:342
 msgid "Backfill cancelled."
 msgstr "Etterfylling avbrutt."
 
-#: includes/Admin/Settings_Page.php:311
+#: includes/Admin/Settings_Page.php:343
 msgid "Backfill restarted from the beginning."
 msgstr "Etterfylling startet på nytt fra begynnelsen."
 
-#: includes/Admin/Settings_Page.php:312
+#: includes/Admin/Settings_Page.php:344
 msgid "The backfill action did not run. Is a model selected?"
 msgstr "Etterfyllingen ble ikke kjørt. Er en modell valgt?"
 
-#: includes/Admin/Settings_Page.php:325
+#: includes/Admin/Settings_Page.php:361
 msgid "Index status"
 msgstr "Indeksstatus"
 
-#: includes/Admin/Settings_Page.php:327
+#: includes/Admin/Settings_Page.php:363
 msgid "Choose a model and save to start embedding content."
 msgstr "Velg en modell og lagre for å begynne å embedde innhold."
 
-#: includes/Admin/Settings_Page.php:331
+#: includes/Admin/Settings_Page.php:367
 msgid "Post type"
 msgstr "Innleggstype"
 
-#: includes/Admin/Settings_Page.php:331
+#: includes/Admin/Settings_Page.php:367
 msgid "Embedded"
 msgstr "Embeddet"
 
-#: includes/Admin/Settings_Page.php:331
+#: includes/Admin/Settings_Page.php:367
 msgid "Indexable"
 msgstr "Indekserbare"
 
-#: includes/Admin/Settings_Page.php:345
+#: includes/Admin/Settings_Page.php:381
 msgid "Backfill"
 msgstr "Etterfylling"
 
-#: includes/Admin/Settings_Page.php:345
+#: includes/Admin/Settings_Page.php:381
 msgid "not started"
 msgstr "ikke startet"
 
-#: includes/Admin/Settings_Page.php:346
+#: includes/Admin/Settings_Page.php:382
 msgid "Queue"
 msgstr "Kø"
 
 #. translators: 1: pending objects, 2: failed objects.
-#: includes/Admin/Settings_Page.php:348
+#: includes/Admin/Settings_Page.php:384
 #, php-format
 msgid "%1$d pending, %2$d failed"
 msgstr "%1$d venter, %2$d feilet"
 
-#: includes/Admin/Settings_Page.php:352
+#: includes/Admin/Settings_Page.php:388
 msgid "Last run"
 msgstr "Siste kjøring"
 
-#: includes/Admin/Settings_Page.php:352
+#: includes/Admin/Settings_Page.php:388
 msgid "never"
 msgstr "aldri"
 
-#: includes/Admin/Settings_Page.php:355
+#: includes/Admin/Settings_Page.php:391
 msgid "Paused until"
 msgstr "Satt på pause til"
 
-#: includes/Admin/Settings_Page.php:358
+#: includes/Admin/Settings_Page.php:394
 msgid "Provider error"
 msgstr "Leverandørfeil"
 
-#: includes/Admin/Settings_Page.php:370
+#: includes/Admin/Settings_Page.php:406
 msgid "Cancel backfill"
 msgstr "Avbryt etterfylling"
 
-#: includes/Admin/Settings_Page.php:372
+#: includes/Admin/Settings_Page.php:408
 msgid "Start backfill"
 msgstr "Start etterfylling"
 
-#: includes/Admin/Settings_Page.php:374
+#: includes/Admin/Settings_Page.php:410
 msgid "Reset and re-run"
 msgstr "Nullstill og kjør på nytt"
 
-#: includes/Ai_Adapter.php:92
+#: includes/Ai_Adapter.php:139
 msgid "Embedding generation is not available."
 msgstr "Generering av embeddinger er ikke tilgjengelig."
 
-#: includes/Ai_Adapter.php:107
+#: includes/Ai_Adapter.php:154
 msgid "The provider returned no embedding."
 msgstr "Leverandøren returnerte ingen embedding."
 
@@ -331,6 +332,18 @@ msgstr "Grensen for semantisk søk er nådd."
 msgid "No embedding model is selected."
 msgstr "Ingen embeddingmodell er valgt."
 
-#: includes/Admin/Settings_Page.php:80
+#: includes/Admin/Settings_Page.php:82
 msgid "Semantic search"
 msgstr "Semantisk søk"
+
+#: includes/Admin/Settings_Page.php:311
+msgid "The model list is saved for 12 hours."
+msgstr "Modellisten lagres i 12 timer."
+
+#: includes/Admin/Settings_Page.php:313
+msgid "Refresh model list"
+msgstr "Oppdater modellisten"
+
+#: includes/Admin/Settings_Page.php:352
+msgid "Model list refreshed."
+msgstr "Modellisten er oppdatert."

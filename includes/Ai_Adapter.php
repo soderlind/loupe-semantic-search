@@ -28,6 +28,11 @@ class Ai_Adapter {
 	public const CONSUMER_ID = 'loupe-semantic-search';
 
 	/**
+	 * Transient prefix for the embedding model list.
+	 */
+	public const MODELS_TRANSIENT = 'loupe_semantic_models_';
+
+	/**
 	 * Whether the `ai` plugin with embedding sync (1.5+) is loaded.
 	 */
 	public function is_available(): bool {
@@ -42,16 +47,63 @@ class Ai_Adapter {
 	/**
 	 * Embedding models offered by connected providers.
 	 *
+	 * Listing models is an HTTP request per provider. The AI client caches it in the
+	 * object cache, which does not outlive the request without a persistent object
+	 * cache, so the list is kept in a transient for 12 hours, or 5 minutes when a
+	 * provider failed so it is asked again soon. The transient key changes when a
+	 * connector is added, removed, connected or disconnected.
+	 *
+	 * @param bool $refresh Ask the providers again instead of using the saved list.
 	 * @return list<array{provider:string,provider_name:string,model:string,model_name:string}>
 	 */
-	public function embedding_models(): array {
+	public function embedding_models( bool $refresh = false ): array {
 		if ( ! $this->is_available() || ! function_exists( 'WordPress\\AI\\get_ai_connectors' ) ) {
 			return [];
 		}
 
+		$key = self::MODELS_TRANSIENT . md5( (string) wp_json_encode( $this->connector_state() ) );
+		if ( ! $refresh ) {
+			$cached = get_transient( $key );
+			if ( is_array( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		[ 'models' => $models, 'complete' => $complete ] = $this->fetch_embedding_models();
+		if ( empty( $models ) ) {
+			delete_transient( $key );
+		} else {
+			set_transient( $key, $models, $complete ? 12 * HOUR_IN_SECONDS : 5 * MINUTE_IN_SECONDS );
+		}
+		return $models;
+	}
+
+	/**
+	 * Active connectors and whether each has credentials, without network requests.
+	 *
+	 * @return array<string,bool>
+	 */
+	protected function connector_state(): array {
+		$state = [];
+		foreach ( array_keys( \WordPress\AI\get_ai_connectors() ) as $provider_id ) {
+			$state[ (string) $provider_id ] = function_exists( 'WordPress\\AI\\has_connector_authentication' )
+				&& \WordPress\AI\has_connector_authentication( (string) $provider_id );
+		}
+		ksort( $state );
+		return $state;
+	}
+
+	/**
+	 * Ask each connected provider for its embedding models.
+	 *
+	 * @return array{models:list<array{provider:string,provider_name:string,model:string,model_name:string}>,complete:bool}
+	 *         `complete` is false when a provider failed.
+	 */
+	protected function fetch_embedding_models(): array {
 		$registry     = AiClient::defaultRegistry();
 		$requirements = new ModelRequirements( [ CapabilityEnum::embeddingGeneration() ], [] );
 		$models       = [];
+		$complete     = true;
 
 		foreach ( array_keys( \WordPress\AI\get_ai_connectors() ) as $provider_id ) {
 			try {
@@ -70,11 +122,11 @@ class Ai_Adapter {
 					];
 				}
 			} catch ( \Throwable $e ) {
-				continue;
+				$complete = false;
 			}
 		}
 
-		return $models;
+		return [ 'models' => $models, 'complete' => $complete ];
 	}
 
 	/**

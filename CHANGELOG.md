@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.1] - 2026-11-13
+
+### Fixed
+
+- The *Semantic search* tab opened slowly because the embedding model list was fetched from the provider
+  on every page load (the AI client only caches it in the object cache). The list is now saved in a
+  transient for 12 hours, keyed by the active connectors and whether each has credentials. When a provider
+  fails, the list is saved for 5 minutes so the provider is asked again soon. An empty list clears the saved one.
+
+### Added
+
+- *Refresh model list* link below the model picker.
+
 ## [0.1.0] - 2026-11-13
 
 ### Added
