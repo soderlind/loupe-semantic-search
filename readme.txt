@@ -5,7 +5,7 @@ Requires at least: 7.0.3
 Tested up to: 7.1
 Requires PHP: 8.3
 Requires Plugins: loupe-search, ai
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,6 +39,9 @@ Any provider connected under Settings → Connectors that offers embedding model
 Yes. The title and content of every post Loupe Search indexes, and every search query, are sent to the connected provider to create embeddings.
 
 == Changelog ==
+
+= 0.1.2 =
+* Documentation and tests: an architecture overview with diagrams, corrected design notes, and new unit tests. No functional changes.
 
 = 0.1.1 =
 * The Semantic search tab opens faster: the list of embedding models is saved for 12 hours instead of being fetched from the provider on every page load. A "Refresh model list" link fetches it again.

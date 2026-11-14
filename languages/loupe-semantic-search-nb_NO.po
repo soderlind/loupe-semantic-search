@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Loupe Semantic Search 0.1.1\n"
+"Project-Id-Version: Loupe Semantic Search 0.1.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/loupe-semantic-search\n"
 "Last-Translator: Per Soderlind\n"
 "Language-Team: Norwegian Bokmål\n"

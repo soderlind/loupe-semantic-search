@@ -1,0 +1,1149 @@
+{
+  "schemaVersion": "0.3.1",
+  "kind": "graph",
+  "id": "loupe-semantic-search-architecture",
+  "title": "Loupe Semantic Search architecture (current, 0.1.1)",
+  "summary": "Current behavior of Loupe Semantic Search 0.1.1, drawn from docs/architecture.md.",
+  "lenses": [
+    "architecture",
+    "data-flow"
+  ],
+  "provenance": {
+    "repo": {
+      "owner": "soderlind",
+      "name": "loupe-semantic-search",
+      "host": "github.com"
+    },
+    "base": {
+      "sha": "4cd8284265d08af8cf4a573fa90c214d15b30cde",
+      "ref": "main"
+    },
+    "head": {
+      "sha": "4cd8284265d08af8cf4a573fa90c214d15b30cde",
+      "ref": "main"
+    },
+    "generator": {
+      "name": "illustrate-grill"
+    }
+  },
+  "lanes": [
+    {
+      "id": "actors",
+      "label": "Callers",
+      "order": 0
+    },
+    {
+      "id": "loupe",
+      "label": "Loupe Search",
+      "subtitle": "plugin, 1.5.0+",
+      "order": 1
+    },
+    {
+      "id": "lss",
+      "label": "Loupe Semantic Search",
+      "subtitle": "this add-on",
+      "order": 2
+    },
+    {
+      "id": "ai",
+      "label": "WordPress ai plugin",
+      "subtitle": "1.5.0+",
+      "order": 3
+    },
+    {
+      "id": "external",
+      "label": "External",
+      "order": 4
+    }
+  ],
+  "nodes": [
+    {
+      "id": "visitor",
+      "label": "Visitor / Search block",
+      "kind": "ui",
+      "lane": "actors",
+      "delta": "unchanged",
+      "files": [],
+      "badges": []
+    },
+    {
+      "id": "agent",
+      "label": "AI agent / MCP client",
+      "kind": "external",
+      "lane": "actors",
+      "delta": "unchanged",
+      "files": [],
+      "badges": []
+    },
+    {
+      "id": "operator",
+      "label": "Administrator / WP-CLI",
+      "kind": "ui",
+      "lane": "actors",
+      "delta": "unchanged",
+      "files": [],
+      "badges": []
+    },
+    {
+      "id": "loupe-engine",
+      "label": "WP_Loupe_Search_Engine",
+      "kind": "module",
+      "lane": "loupe",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "/?s=, loupe-search/search"
+    },
+    {
+      "id": "loupe-rest",
+      "label": "WP_Loupe_REST",
+      "kind": "route",
+      "lane": "loupe",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "POST /search"
+    },
+    {
+      "id": "loupe-rules",
+      "label": "Loupe indexability rules",
+      "kind": "function",
+      "lane": "loupe",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "is_post_indexable, public?"
+    },
+    {
+      "id": "hybrid",
+      "label": "Hybrid_Search",
+      "kind": "module",
+      "lane": "lss",
+      "delta": "unchanged",
+      "files": [
+        {
+          "path": "includes/Hybrid_Search.php"
+        },
+        {
+          "path": "includes/Fusion.php"
+        }
+      ],
+      "badges": [],
+      "subtitle": "RRF fusion via Fusion::rrf()"
+    },
+    {
+      "id": "abilities",
+      "label": "Abilities",
+      "kind": "route",
+      "lane": "lss",
+      "delta": "unchanged",
+      "files": [
+        {
+          "path": "includes/Abilities.php"
+        }
+      ],
+      "badges": [],
+      "subtitle": "retrieve, search"
+    },
+    {
+      "id": "admin-ui",
+      "label": "Settings tab and CLI",
+      "kind": "ui",
+      "lane": "lss",
+      "delta": "unchanged",
+      "files": [
+        {
+          "path": "includes/Admin/Settings_Page.php"
+        },
+        {
+          "path": "includes/CLI/Command.php"
+        }
+      ],
+      "badges": [],
+      "subtitle": "wp loupe-semantic"
+    },
+    {
+      "id": "retriever",
+      "label": "Retriever",
+      "kind": "module",
+      "lane": "lss",
+      "delta": "unchanged",
+      "files": [
+        {
+          "path": "includes/Retriever.php"
+        }
+      ],
+      "badges": [],
+      "subtitle": "search(), passages()"
+    },
+    {
+      "id": "embedder",
+      "label": "Query_Embedder",
+      "kind": "module",
+      "lane": "lss",
+      "delta": "unchanged",
+      "files": [
+        {
+          "path": "includes/Query_Embedder.php"
+        },
+        {
+          "path": "includes/Rate_Limiter.php"
+        }
+      ],
+      "badges": [],
+      "subtitle": "cache + limits"
+    },
+    {
+      "id": "store",
+      "label": "Vector store",
+      "kind": "module",
+      "lane": "lss",
+      "delta": "unchanged",
+      "files": [
+        {
+          "path": "includes/Ai_Repository_Vector_Store.php"
+        },
+        {
+          "path": "includes/Vector_Store.php"
+        }
+      ],
+      "badges": [],
+      "subtitle": "cosine scan"
+    },
+    {
+      "id": "passages",
+      "label": "Passage_Builder",
+      "kind": "module",
+      "lane": "lss",
+      "delta": "unchanged",
+      "files": [
+        {
+          "path": "includes/Passage_Builder.php"
+        }
+      ],
+      "badges": [],
+      "subtitle": "chunk text or stale excerpt"
+    },
+    {
+      "id": "indexability",
+      "label": "Indexability",
+      "kind": "function",
+      "lane": "lss",
+      "delta": "unchanged",
+      "files": [
+        {
+          "path": "includes/Indexability.php"
+        }
+      ],
+      "badges": [],
+      "subtitle": "wpai_embedding_sync_is_indexable"
+    },
+    {
+      "id": "adapter",
+      "label": "Ai_Adapter",
+      "kind": "module",
+      "lane": "lss",
+      "delta": "unchanged",
+      "files": [
+        {
+          "path": "includes/Ai_Adapter.php"
+        }
+      ],
+      "badges": [
+        "boundary"
+      ],
+      "subtitle": "only caller of the ai plugin"
+    },
+    {
+      "id": "ai-sync",
+      "label": "Embedding_Sync",
+      "kind": "job",
+      "lane": "ai",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "queue, chunker, backfill"
+    },
+    {
+      "id": "ai-repo",
+      "label": "Embedding repository",
+      "kind": "datastore",
+      "lane": "ai",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "chunk vectors + content hash"
+    },
+    {
+      "id": "provider",
+      "label": "Embedding provider",
+      "kind": "external",
+      "lane": "external",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "AI Client + Connectors"
+    }
+  ],
+  "edges": [
+    {
+      "id": "visitor-engine",
+      "from": "visitor",
+      "to": "loupe-engine",
+      "kind": "http",
+      "label": "/?s=",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "visitor-rest",
+      "from": "visitor",
+      "to": "loupe-rest",
+      "kind": "http",
+      "label": "POST /search",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "agent-abilities",
+      "from": "agent",
+      "to": "abilities",
+      "kind": "call",
+      "label": "abilities",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "operator-admin",
+      "from": "operator",
+      "to": "admin-ui",
+      "kind": "call",
+      "label": "settings, wp loupe-semantic",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "engine-hybrid",
+      "from": "loupe-engine",
+      "to": "hybrid",
+      "kind": "event",
+      "label": "loupe_search_order_results",
+      "delta": "unchanged",
+      "emphasis": "hero",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "rest-hybrid",
+      "from": "loupe-rest",
+      "to": "hybrid",
+      "kind": "event",
+      "label": "loupe_search_advanced_hits",
+      "delta": "unchanged",
+      "emphasis": "hero",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "abilities-engine",
+      "from": "abilities",
+      "to": "loupe-engine",
+      "kind": "call",
+      "label": "keyword hits (search)",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "abilities-hybrid",
+      "from": "abilities",
+      "to": "hybrid",
+      "kind": "call",
+      "label": "apply() (search)",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "abilities-retriever",
+      "from": "abilities",
+      "to": "retriever",
+      "kind": "call",
+      "label": "passages() (retrieve)",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "admin-retriever",
+      "from": "admin-ui",
+      "to": "retriever",
+      "kind": "call",
+      "label": "passages() (wp query)",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "hybrid-retriever",
+      "from": "hybrid",
+      "to": "retriever",
+      "kind": "call",
+      "label": "search()",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "retriever-embedder",
+      "from": "retriever",
+      "to": "embedder",
+      "kind": "call",
+      "label": "embed query",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "retriever-store",
+      "from": "retriever",
+      "to": "store",
+      "kind": "call",
+      "label": "nearest posts",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "retriever-passages",
+      "from": "retriever",
+      "to": "passages",
+      "kind": "call",
+      "label": "passage text",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "retriever-rules",
+      "from": "retriever",
+      "to": "loupe-rules",
+      "kind": "call",
+      "label": "indexable / public?",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "indexability-rules",
+      "from": "indexability",
+      "to": "loupe-rules",
+      "kind": "call",
+      "label": "veto",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "embedder-adapter",
+      "from": "embedder",
+      "to": "adapter",
+      "kind": "call",
+      "label": "embed()",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "store-adapter",
+      "from": "store",
+      "to": "adapter",
+      "kind": "call",
+      "label": "iterate vectors",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "passages-adapter",
+      "from": "passages",
+      "to": "adapter",
+      "kind": "call",
+      "label": "text, hash, chunks",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "admin-adapter",
+      "from": "admin-ui",
+      "to": "adapter",
+      "kind": "call",
+      "label": "models, backfill, status",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "adapter-sync",
+      "from": "adapter",
+      "to": "ai-sync",
+      "kind": "call",
+      "label": "consumer, backfill, prune",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "adapter-repo",
+      "from": "adapter",
+      "to": "ai-repo",
+      "kind": "data",
+      "label": "read vectors",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "sync-indexability",
+      "from": "ai-sync",
+      "to": "indexability",
+      "kind": "event",
+      "label": "is_indexable filter",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "sync-repo",
+      "from": "ai-sync",
+      "to": "ai-repo",
+      "kind": "data",
+      "label": "store vectors",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "sync-provider",
+      "from": "ai-sync",
+      "to": "provider",
+      "kind": "http",
+      "label": "embed chunks",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "adapter-provider",
+      "from": "adapter",
+      "to": "provider",
+      "kind": "http",
+      "label": "query vectors, model list",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    }
+  ],
+  "flows": [
+    {
+      "id": "hybrid-search",
+      "title": "Hybrid front-end search",
+      "delta": "unchanged",
+      "participants": [
+        {
+          "node": "visitor",
+          "label": "Visitor"
+        },
+        {
+          "node": "loupe-engine",
+          "label": "Loupe engine"
+        },
+        {
+          "node": "hybrid",
+          "label": "Hybrid_Search"
+        },
+        {
+          "node": "retriever",
+          "label": "Retriever"
+        },
+        {
+          "node": "embedder",
+          "label": "Query_Embedder"
+        },
+        {
+          "node": "adapter",
+          "label": "Ai_Adapter"
+        },
+        {
+          "node": "provider",
+          "label": "Provider"
+        },
+        {
+          "node": "store",
+          "label": "Vector store"
+        },
+        {
+          "node": "loupe-rules",
+          "label": "Loupe rules"
+        }
+      ],
+      "messages": [
+        {
+          "id": "query",
+          "from": "visitor",
+          "to": "loupe-engine",
+          "label": "GET /?s=query",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "keyword",
+          "from": "loupe-engine",
+          "to": "loupe-engine",
+          "label": "keyword hits",
+          "kind": "self",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "order-filter",
+          "from": "loupe-engine",
+          "to": "hybrid",
+          "label": "loupe_search_order_results",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "search",
+          "from": "hybrid",
+          "to": "retriever",
+          "label": "search(), 50 candidates",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "embed",
+          "from": "retriever",
+          "to": "embedder",
+          "label": "embed(query), 30 min cache",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": [],
+          "note": "Cached vector returned for 30 min; otherwise a rate-limit slot is taken."
+        },
+        {
+          "id": "adapter-embed",
+          "from": "embedder",
+          "to": "adapter",
+          "label": "uncached: rate limit, embed(), 1.5 s",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": [],
+          "note": "Uncached queries only."
+        },
+        {
+          "id": "provider-call",
+          "from": "adapter",
+          "to": "provider",
+          "label": "embedding request",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "provider-vector",
+          "from": "provider",
+          "to": "adapter",
+          "label": "vector",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "vector",
+          "from": "adapter",
+          "to": "embedder",
+          "label": "vector",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "query-vector",
+          "from": "embedder",
+          "to": "retriever",
+          "label": "query vector",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "nearest",
+          "from": "retriever",
+          "to": "store",
+          "label": "nearest posts (3 x limit + 10)",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "matches",
+          "from": "store",
+          "to": "retriever",
+          "label": "best chunk per post >= min_similarity",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "indexable",
+          "from": "retriever",
+          "to": "loupe-rules",
+          "label": "indexable?",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "indexable-result",
+          "from": "loupe-rules",
+          "to": "retriever",
+          "label": "drop posts Loupe would not index",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "semantic",
+          "from": "retriever",
+          "to": "hybrid",
+          "label": "semantic matches",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "fuse",
+          "from": "hybrid",
+          "to": "hybrid",
+          "label": "RRF fuse (-term: rerank only)",
+          "kind": "self",
+          "delta": "unchanged",
+          "animated": true,
+          "files": [],
+          "note": "With a -term exclusion, semantic matches only reorder keyword hits."
+        },
+        {
+          "id": "fused",
+          "from": "hybrid",
+          "to": "loupe-engine",
+          "label": "fused hits",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "results",
+          "from": "loupe-engine",
+          "to": "visitor",
+          "label": "results (cached by Loupe)",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        }
+      ]
+    },
+    {
+      "id": "hybrid-fallback",
+      "title": "Hybrid search when the semantic side fails",
+      "delta": "unchanged",
+      "participants": [
+        {
+          "node": "visitor",
+          "label": "Visitor"
+        },
+        {
+          "node": "loupe-engine",
+          "label": "Loupe engine"
+        },
+        {
+          "node": "hybrid",
+          "label": "Hybrid_Search"
+        },
+        {
+          "node": "retriever",
+          "label": "Retriever"
+        }
+      ],
+      "messages": [
+        {
+          "id": "query",
+          "from": "visitor",
+          "to": "loupe-engine",
+          "label": "GET /?s=query",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "order-filter",
+          "from": "loupe-engine",
+          "to": "hybrid",
+          "label": "loupe_search_order_results",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "search",
+          "from": "hybrid",
+          "to": "retriever",
+          "label": "search()",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "error",
+          "from": "retriever",
+          "to": "hybrid",
+          "label": "WP_Error: no model, limit, provider",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": [],
+          "note": "No model, rate limited, daily cap, or provider error/timeout."
+        },
+        {
+          "id": "unchanged",
+          "from": "hybrid",
+          "to": "loupe-engine",
+          "label": "keyword hits unchanged",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "results",
+          "from": "loupe-engine",
+          "to": "visitor",
+          "label": "keyword results",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        }
+      ]
+    },
+    {
+      "id": "rag-retrieve",
+      "title": "RAG retrieval (loupe-semantic/retrieve)",
+      "delta": "unchanged",
+      "participants": [
+        {
+          "node": "agent",
+          "label": "AI agent"
+        },
+        {
+          "node": "abilities",
+          "label": "Abilities"
+        },
+        {
+          "node": "retriever",
+          "label": "Retriever"
+        },
+        {
+          "node": "embedder",
+          "label": "Query_Embedder"
+        },
+        {
+          "node": "store",
+          "label": "Vector store"
+        },
+        {
+          "node": "loupe-rules",
+          "label": "Loupe rules"
+        },
+        {
+          "node": "passages",
+          "label": "Passage_Builder"
+        }
+      ],
+      "messages": [
+        {
+          "id": "call",
+          "from": "agent",
+          "to": "abilities",
+          "label": "loupe-semantic/retrieve",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": [],
+          "note": "Users who can read (filter loupe_semantic_ability_permission)."
+        },
+        {
+          "id": "limits",
+          "from": "abilities",
+          "to": "abilities",
+          "label": "public indexed types, limit 1-20",
+          "kind": "self",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "passages",
+          "from": "abilities",
+          "to": "retriever",
+          "label": "passages(public_only)",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "embed",
+          "from": "retriever",
+          "to": "embedder",
+          "label": "embed(query)",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "vector",
+          "from": "embedder",
+          "to": "retriever",
+          "label": "query vector",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "nearest",
+          "from": "retriever",
+          "to": "store",
+          "label": "nearest posts",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "matches",
+          "from": "store",
+          "to": "retriever",
+          "label": "best chunk per post",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "check",
+          "from": "retriever",
+          "to": "loupe-rules",
+          "label": "indexable and publicly viewable?",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "kept",
+          "from": "loupe-rules",
+          "to": "retriever",
+          "label": "kept posts",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "build",
+          "from": "retriever",
+          "to": "passages",
+          "label": "build(post, chunk, hash)",
+          "kind": "sync",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "text",
+          "from": "passages",
+          "to": "retriever",
+          "label": "chunk text, or excerpt with stale: true",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "result",
+          "from": "retriever",
+          "to": "abilities",
+          "label": "passages",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        },
+        {
+          "id": "reply",
+          "from": "abilities",
+          "to": "agent",
+          "label": "passages with URLs + model",
+          "kind": "return",
+          "delta": "unchanged",
+          "animated": true,
+          "files": []
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "system-context",
+      "title": "System context (current)",
+      "lens": "architecture",
+      "scope": {
+        "kind": "selection",
+        "nodes": [
+          "visitor",
+          "agent",
+          "operator",
+          "loupe-engine",
+          "loupe-rest",
+          "loupe-rules",
+          "hybrid",
+          "abilities",
+          "admin-ui",
+          "indexability",
+          "adapter",
+          "ai-sync",
+          "ai-repo",
+          "provider"
+        ]
+      },
+      "defaultOpen": true
+    },
+    {
+      "id": "retrieval-components",
+      "title": "Retrieval components (current)",
+      "lens": "architecture",
+      "scope": {
+        "kind": "selection",
+        "nodes": [
+          "hybrid",
+          "abilities",
+          "admin-ui",
+          "retriever",
+          "embedder",
+          "store",
+          "passages",
+          "adapter",
+          "loupe-rules"
+        ]
+      }
+    },
+    {
+      "id": "hybrid-search-view",
+      "title": "Hybrid front-end search (current)",
+      "lens": "data-flow",
+      "scope": {
+        "kind": "selection",
+        "flows": [
+          "hybrid-search"
+        ]
+      }
+    },
+    {
+      "id": "hybrid-fallback-view",
+      "title": "Semantic side fails (current)",
+      "lens": "data-flow",
+      "scope": {
+        "kind": "selection",
+        "flows": [
+          "hybrid-fallback"
+        ]
+      }
+    },
+    {
+      "id": "rag-retrieve-view",
+      "title": "RAG retrieval (current)",
+      "lens": "data-flow",
+      "scope": {
+        "kind": "selection",
+        "flows": [
+          "rag-retrieve"
+        ]
+      }
+    }
+  ],
+  "layout": {
+    "direction": "right",
+    "laneOrder": [
+      "actors",
+      "loupe",
+      "lss",
+      "ai",
+      "external"
+    ]
+  }
+}

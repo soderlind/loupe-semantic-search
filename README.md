@@ -125,6 +125,8 @@ The AI plugin's `wp ai embeddings sync` commands also work with the consumer
 
 ## Development
 
+The code structure, request flows and invariants are described in [docs/architecture.md](docs/architecture.md).
+
 ```
 composer install
 composer test
