@@ -5,6 +5,8 @@
     "test:acceptance": "playwright test --config tests/acceptance/playwright.config.ts"
   },
   "devDependencies": {
+    "@coldtea/pr-lens-renderer": "^0.6.2",
+    "@coldtea/pr-lens-schema": "^0.10.0",
     "@playwright/test": "^1.65.0"
   }
 }

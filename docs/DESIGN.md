@@ -1,6 +1,7 @@
 # Loupe Semantic Search — Design
 
-Status: agreed design for v0.1.0. Implementation follows this document.
+Status: agreed design for v0.1.0, kept for its rationale. The current implementation is described in
+[architecture.md](architecture.md), which takes precedence where the two differ.
 
 ## Purpose
 
@@ -47,17 +48,23 @@ WordPress 7 core ships Connectors and the AI Client, but no embedding API. The `
 (1.5.0+) provides `generate_embeddings()` on top of the connectors and a complete sync pipeline.
 Loupe Semantic Search does not implement its own queue, chunker, or vector storage.
 
-All calls into the `ai` plugin live in one adapter class (`Ai_Adapter`). It checks the `ai`
-plugin version and the presence of the classes and functions it uses; if anything is missing the
+All calls into the `ai` plugin and the AI Client live in one adapter class (`Ai_Adapter`). It
+checks for the classes and functions it uses, not for a version number; if anything is missing the
 add-on deactivates its features and shows an admin notice. Used surface:
 
-- `WordPress\AI\supports_embedding_generation()`, `WordPress\AI\generate_embeddings()`
+- `WordPress\AI\supports_embedding_generation()`, `get_ai_connectors()`,
+  `has_connector_authentication()`
 - `WordPress\AI\register_embedding_consumer()` (before `init` priority 20)
 - `Embedding_Sync::start_backfill()`, `cancel_backfill()`, `reset_backfill()`, `get_status()`,
   `prune_target()`, `instance()->get_repository()`, `instance()->get_registry()`
-- `Embedding_Repository::iterate()`, `get_content_hash()`
-- `Text_Chunker`, `Object_Processor::hash_text()`, `Vector_Math` / `Vector_Ranker`
+- `Embedding_Repository::iterate()` and the records' `get_content_hash()`
+- `Post_Source::get_text()`, `Text_Chunker::chunk()`, `Object_Processor::hash_text()`
+- AI Client: `EmbeddingBuilder` for query embeddings (with a request timeout), and
+  `AiClient::defaultRegistry()->findProviderModelsMetadataForSupport()` for the model list
 - Filters `wpai_embedding_sync_is_indexable`, `wpai_embedding_sync_max_chunks`
+
+Cosine similarity is computed by the add-on (`Ai_Repository_Vector_Store::cosine()`), not by the
+`ai` plugin.
 
 ## Provider and model
 
@@ -66,6 +73,9 @@ add-on deactivates its features and shows an admin notice. Used surface:
   linking to Connectors.
 - The settings page lists only connected providers' models with the `embedding_generation`
   capability. The admin must choose one; nothing is selected automatically.
+- The model list costs one HTTP request per provider. Since 0.1.1 it is saved in a transient for
+  12 hours (5 minutes when a provider failed), keyed by the active connectors and whether each has
+  credentials. An empty list is not saved, and a "Refresh model list" link fetches it again.
 - Optional dimensions setting, passed through when the model supports it.
 - Changing the model: register the consumer with the new target, start a backfill, and prune the
   old target's vectors once no other consumer uses it.
@@ -175,7 +185,7 @@ Same input and output shape as `loupe-search/search` (`hits`, `total_hits`, `pag
 - Per-IP rate limit for anonymous query embeddings: 30 per minute (`loupe_semantic_rate_limit`).
 - Site-wide daily cap on embedding calls: 5,000 (setting, `loupe_semantic_daily_cap`).
 - Cached query vectors do not count against either limit.
-- Logged-in users with `manage_options` are exempt from the per-IP limit.
+- Logged-in users with `manage_options` and WP-CLI are exempt from the per-IP limit.
 
 ## Settings page
 
@@ -227,14 +237,14 @@ Loupe Admin Search, each with a minor version bump and changelog entry.
 
 ```
 loupe-semantic-search.php
-includes/          PSR-4 classes (Composer autoload)
+includes/          PSR-4 classes (the plugin's own autoloader; Composer's is for tests only)
 languages/         .pot and nb_NO translations
 tests/php/         PHPUnit + Brain Monkey
-docs/DESIGN.md
+docs/DESIGN.md, docs/architecture.md
 README.md, readme.txt, CHANGELOG.md, uninstall.php
 ```
 
-Local `git init` only; the GitHub repository is created later.
+Repository: [soderlind/loupe-semantic-search](https://github.com/soderlind/loupe-semantic-search).
 
 ## Out of scope for v0.1.0
 

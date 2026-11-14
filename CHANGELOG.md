@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.2] - 2026-11-14
+
+### Added
+
+- Architecture documentation (`docs/architecture.md`) with PR Lens diagrams: system context, retrieval
+  components, and the hybrid search, fallback and RAG retrieval flows.
+- Unit tests for two rules: old vectors are deleted only when no other consumer uses the model, and
+  abilities/CLI passages contain only publicly viewable posts.
+
+### Changed
+
+- `docs/DESIGN.md` corrected to match the code: the `ai` plugin availability check, the API surface it
+  uses, the autoloader, the model-list cache, and the WP-CLI rate-limit exemption.
+
 ## [0.1.1] - 2026-11-13
 
 ### Fixed
