@@ -5,6 +5,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { safeParseGraphDoc } from "@coldtea/pr-lens-schema";
 import { flattenViews, render, renderAssetId } from "@coldtea/pr-lens-renderer";
+import { applyOverrides } from "./palette.mjs";
 
 const args = process.argv.slice(2);
 if (args.length !== 2) {
@@ -45,7 +46,7 @@ for (const view of supportedViews) {
     }
     filenames.add(normalizedName);
     const { svg, width, height } = render(parsed.value, { lens: view.lens, view: view.id, theme });
-    outputs.push({ filename, svg, width, height });
+    outputs.push({ filename, svg: applyOverrides(svg, theme), width, height });
   }
 }
 

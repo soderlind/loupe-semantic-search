@@ -9,7 +9,9 @@ pins `main` at `4cd8284` (the 0.1.1 code the architecture document describes).
 | --- | --- |
 | [build-graph.mjs](build-graph.mjs) | Source of truth: lanes, nodes, edges, flows and views |
 | [graph.json](graph.json) | Generated PR Lens graph document |
-| [render.mjs](render.mjs) | Validates the graph and renders each view in light and dark |
+| [render.mjs](render.mjs) | Validates the graph and renders each view in light and dark, with the palette overrides applied |
+| [palette.mjs](palette.mjs) | Colour overrides for the renderer palette, chosen to meet WCAG 2.2 contrast |
+| [check-contrast.mjs](check-contrast.mjs) | Prints the contrast of each colour pair; exits 1 if a required pair fails |
 | `img/*.svg` | Canonical diagrams (self-contained, animated flows) |
 | `img/*.png` | Static copies of the SVGs |
 
@@ -20,6 +22,7 @@ From the plugin root (the PR Lens packages are dev dependencies in `package.json
 ```sh
 npm install
 cd docs/diagrams
+node check-contrast.mjs
 node build-graph.mjs
 rm -rf img && node render.mjs graph.json img
 for s in img/*.svg; do rsvg-convert -o "${s%.svg}.png" "$s"; done
@@ -28,6 +31,22 @@ for s in img/*.svg; do rsvg-convert -o "${s%.svg}.png" "$s"; done
 `render.mjs` refuses to overwrite SVGs, so remove `img/` first. `rsvg-convert` comes from
 librsvg (`brew install librsvg`). Message `note`s are kept in the graph but the renderer does
 not draw them, so put anything a reader must see into the label.
+
+## Colour and contrast
+
+The renderer has no palette option, so `palette.mjs` swaps colours in each SVG after rendering.
+Its defaults fail three checks, and the overrides fix them:
+
+| Pair | Requirement | Light | Dark |
+| --- | --- | --- | --- |
+| Muted subtitle on faded (0.82) sequence participant | 4.5:1 (1.4.3) | 4.09 → 4.80 (`#4d5560`) | 4.18 → 4.97 (`#a0a8b1`) |
+| Edge arrows on background | 3:1 (1.4.11) | 2.78 → 3.42 (`#7d8590`) | 4.12, unchanged |
+| Sequence lifelines on background | 3:1 (1.4.11) | 1.31 → 3.09 (`#848d97`) | 1.55 → 3.16 (`#5c646e`) |
+
+All other text is between 5.2:1 and 15.8:1. Card borders stay light (1.3:1 and 1.9:1). They are
+decorative: each card is identified by its label, icon and shadow. After a renderer upgrade, run
+`node check-contrast.mjs` and confirm the new SVGs no longer contain the default colours, because
+the overrides replace exact colour values.
 
 ## Source map
 
