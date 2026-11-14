@@ -29,18 +29,16 @@ Add semantic (vector) retrieval to [Loupe Search](https://github.com/soderlind/l
 
 ## Architecture
 
-```
-                    ┌──────────── ai plugin (WordPress/ai) ─────────────┐
- post saved ──────▶ │ Change_Listener → Sync_Queue → Sync_Worker         │
-                    │   Post_Source::get_text → Text_Chunker → embed     │
-                    │   via Connector provider → Embedding_Repository    │
-                    └────────────────────────────────────────────────────┘
-                                         ▲ register_embedding_consumer()
-                                         │
- search query ──▶ Loupe keyword hits ──┐ │
-                                       ├─┴─ Loupe Semantic Search: embed query, rank
- search query ──▶ query vector ────────┘    vectors, fuse (RRF), filter, rebuild passages
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="diagrams/img/design-overview-dark.svg">
+  <img alt="Indexing and search: the ai plugin embeds saved posts through Change_Listener, Sync_Queue and Sync_Worker into the embedding repository; searches pass from Loupe to Hybrid_Search, Retriever and Ai_Adapter" src="diagrams/img/design-overview-light.svg">
+</picture>
+
+Indexing runs in the `ai` plugin. When a post is saved, `Change_Listener` queues it if a registered
+consumer covers its type. `Sync_Worker` then gets the post text, chunks it, has the provider embed
+the chunks, and stores the vectors. The add-on only registers its consumer through `Ai_Adapter`.
+At search time, Loupe's keyword hits reach `Hybrid_Search`. `Retriever` embeds the query, ranks
+stored vectors, filters the matches and rebuilds passages, and the results are fused with RRF.
 
 ### Dependency on the `ai` plugin
 

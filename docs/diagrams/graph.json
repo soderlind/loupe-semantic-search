@@ -58,6 +58,16 @@
   ],
   "nodes": [
     {
+      "id": "editor",
+      "label": "Editor",
+      "kind": "ui",
+      "lane": "actors",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "saves a post"
+    },
+    {
       "id": "visitor",
       "label": "Visitor / Search block",
       "kind": "ui",
@@ -265,6 +275,55 @@
       "subtitle": "queue, chunker, backfill"
     },
     {
+      "id": "ai-listener",
+      "label": "Change_Listener",
+      "kind": "module",
+      "lane": "ai",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "covered types"
+    },
+    {
+      "id": "ai-queue",
+      "label": "Sync_Queue",
+      "kind": "queue",
+      "lane": "ai",
+      "delta": "unchanged",
+      "files": [],
+      "badges": []
+    },
+    {
+      "id": "ai-worker",
+      "label": "Sync_Worker",
+      "kind": "job",
+      "lane": "ai",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "via Object_Processor"
+    },
+    {
+      "id": "ai-source",
+      "label": "Post_Source",
+      "kind": "function",
+      "lane": "ai",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "get_text()"
+    },
+    {
+      "id": "ai-chunker",
+      "label": "Text_Chunker",
+      "kind": "function",
+      "lane": "ai",
+      "delta": "unchanged",
+      "files": [],
+      "badges": [],
+      "subtitle": "chunk()"
+    },
+    {
       "id": "ai-repo",
       "label": "Embedding repository",
       "kind": "datastore",
@@ -272,7 +331,7 @@
       "delta": "unchanged",
       "files": [],
       "badges": [],
-      "subtitle": "chunk vectors + content hash"
+      "subtitle": "vectors + hash"
     },
     {
       "id": "provider",
@@ -556,6 +615,94 @@
       "to": "provider",
       "kind": "http",
       "label": "embed chunks",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "editor-listener",
+      "from": "editor",
+      "to": "ai-listener",
+      "kind": "event",
+      "label": "post saved",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "adapter-listener",
+      "from": "adapter",
+      "to": "ai-listener",
+      "kind": "call",
+      "label": "register_embedding_consumer()",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "listener-queue",
+      "from": "ai-listener",
+      "to": "ai-queue",
+      "kind": "data",
+      "label": "enqueue",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "worker-queue",
+      "from": "ai-worker",
+      "to": "ai-queue",
+      "kind": "data",
+      "label": "drain",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "worker-source",
+      "from": "ai-worker",
+      "to": "ai-source",
+      "kind": "call",
+      "label": "post text",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "worker-chunker",
+      "from": "ai-worker",
+      "to": "ai-chunker",
+      "kind": "call",
+      "label": "split into chunks",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "worker-provider",
+      "from": "ai-worker",
+      "to": "provider",
+      "kind": "http",
+      "label": "embed chunks",
+      "delta": "unchanged",
+      "emphasis": "normal",
+      "animated": false,
+      "files": []
+    },
+    {
+      "id": "worker-repo",
+      "from": "ai-worker",
+      "to": "ai-repo",
+      "kind": "data",
+      "label": "store_for_object()",
       "delta": "unchanged",
       "emphasis": "normal",
       "animated": false,
@@ -1099,6 +1246,31 @@
           "passages",
           "adapter",
           "loupe-rules"
+        ]
+      }
+    },
+    {
+      "id": "design-overview",
+      "title": "Indexing and search (current)",
+      "lens": "architecture",
+      "scope": {
+        "kind": "selection",
+        "nodes": [
+          "editor",
+          "visitor",
+          "loupe-engine",
+          "hybrid",
+          "retriever",
+          "embedder",
+          "store",
+          "adapter",
+          "ai-listener",
+          "ai-queue",
+          "ai-worker",
+          "ai-source",
+          "ai-chunker",
+          "ai-repo",
+          "provider"
         ]
       }
     },

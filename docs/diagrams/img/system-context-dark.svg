@@ -87,7 +87,7 @@
 <rect class="chip" x="1389.24" y="556" width="26" height="26" rx="7" fill="rgba(110,118,129,.18)"/><g><ellipse class="glyph-stroke" stroke="#ffa657" stroke-width="1.4" fill="none" cx="1402.24" cy="564.5" rx="6.5" ry="2.6"/>
 <path class="glyph-stroke" d="M1395.74,564.5 v9 a6.5,2.6 0 0 0 13 0 v-9" stroke="#ffa657" stroke-width="1.4" fill="none"/></g>
 <text class="ntitle" x="1425.24" y="565" font-size="13" font-weight="600" fill="#d2a8ff">Embedding repository</text>
-<text class="nsub" x="1425.24" y="583" font-size="9.5" fill="#79c0ff" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">chunk vectors + content hash</text></g>
+<text class="nsub" x="1425.24" y="583" font-size="9.5" fill="#79c0ff" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">vectors + hash</text></g>
 <g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(0,0,0,.28))" opacity="0.82"><rect class="card" x="1799.24" y="538" width="372" height="62" rx="10" fill="#1c2128" stroke-width="1" stroke="#3d444d"/>
 <rect class="chip" x="1813.24" y="556" width="26" height="26" rx="7" fill="rgba(110,118,129,.18)"/><g><rect class="glyph-stroke" x="1818.24" y="563" width="16" height="12" rx="2" stroke="#ffa657" stroke-width="1.4" fill="none"/>
 <path class="glyph-stroke" d="M1818.24,565 l8,6 8,-6" stroke="#ffa657" stroke-width="1.4" fill="none"/></g>

@@ -17,6 +17,7 @@ const lanes = [
 ];
 
 const nodes = [
+  node("editor", "Editor", "ui", "actors", { subtitle: "saves a post" }),
   node("visitor", "Visitor / Search block", "ui", "actors"),
   node("agent", "AI agent / MCP client", "external", "actors"),
   node("operator", "Administrator / WP-CLI", "ui", "actors"),
@@ -36,7 +37,12 @@ const nodes = [
   node("adapter", "Ai_Adapter", "module", "lss", { subtitle: "only caller of the ai plugin", badges: ["boundary"], files: f("includes/Ai_Adapter.php") }),
 
   node("ai-sync", "Embedding_Sync", "job", "ai", { subtitle: "queue, chunker, backfill" }),
-  node("ai-repo", "Embedding repository", "datastore", "ai", { subtitle: "chunk vectors + content hash" }),
+  node("ai-listener", "Change_Listener", "module", "ai", { subtitle: "covered types" }),
+  node("ai-queue", "Sync_Queue", "queue", "ai"),
+  node("ai-worker", "Sync_Worker", "job", "ai", { subtitle: "via Object_Processor" }),
+  node("ai-source", "Post_Source", "function", "ai", { subtitle: "get_text()" }),
+  node("ai-chunker", "Text_Chunker", "function", "ai", { subtitle: "chunk()" }),
+  node("ai-repo", "Embedding repository", "datastore", "ai", { subtitle: "vectors + hash" }),
 
   node("provider", "Embedding provider", "external", "external", { subtitle: "AI Client + Connectors" }),
 ];
@@ -67,6 +73,14 @@ const edges = [
   edge("sync-indexability", "ai-sync", "indexability", "event", "is_indexable filter"),
   edge("sync-repo", "ai-sync", "ai-repo", "data", "store vectors"),
   edge("sync-provider", "ai-sync", "provider", "http", "embed chunks"),
+  edge("editor-listener", "editor", "ai-listener", "event", "post saved"),
+  edge("adapter-listener", "adapter", "ai-listener", "call", "register_embedding_consumer()"),
+  edge("listener-queue", "ai-listener", "ai-queue", "data", "enqueue"),
+  edge("worker-queue", "ai-worker", "ai-queue", "data", "drain"),
+  edge("worker-source", "ai-worker", "ai-source", "call", "post text"),
+  edge("worker-chunker", "ai-worker", "ai-chunker", "call", "split into chunks"),
+  edge("worker-provider", "ai-worker", "provider", "http", "embed chunks"),
+  edge("worker-repo", "ai-worker", "ai-repo", "data", "store_for_object()"),
   edge("adapter-provider", "adapter", "provider", "http", "query vectors, model list"),
 ];
 
@@ -187,6 +201,12 @@ const graph = {
       title: "Retrieval components (current)",
       lens: "architecture",
       scope: { kind: "selection", nodes: ["hybrid", "abilities", "admin-ui", "retriever", "embedder", "store", "passages", "adapter", "loupe-rules"] },
+    },
+    {
+      id: "design-overview",
+      title: "Indexing and search (current)",
+      lens: "architecture",
+      scope: { kind: "selection", nodes: ["editor", "visitor", "loupe-engine", "hybrid", "retriever", "embedder", "store", "adapter", "ai-listener", "ai-queue", "ai-worker", "ai-source", "ai-chunker", "ai-repo", "provider"] },
     },
     { id: "hybrid-search-view", title: "Hybrid front-end search (current)", lens: "data-flow", scope: { kind: "selection", flows: ["hybrid-search"] } },
     { id: "hybrid-fallback-view", title: "Semantic side fails (current)", lens: "data-flow", scope: { kind: "selection", flows: ["hybrid-fallback"] } },

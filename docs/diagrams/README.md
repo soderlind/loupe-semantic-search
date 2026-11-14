@@ -68,6 +68,7 @@ Section names refer to [../architecture.md](../architecture.md).
 | View | Shows | Evidence |
 | --- | --- | --- |
 | `system-context` | Callers, Loupe Search, the add-on's entry points and boundary, the `ai` plugin, the provider (replaces the former Mermaid chart) | System context; Components; Indexing; Model change |
+| `design-overview` | Indexing in the `ai` plugin and the search path through the add-on (replaces the text drawing in DESIGN.md) | DESIGN.md Architecture; `ai` plugin `Change_Listener`, `Sync_Worker`, `Object_Processor` |
 | `retrieval-components` | How `Hybrid_Search`, `Abilities` and the CLI reach `Ai_Adapter` through `Retriever` | Components; Dependency rules |
 | `hybrid-search-view` | Front-end search, from `/?s=` to fused hits | Front-end search (`/?s=`) and `loupe-search/search` |
 | `hybrid-fallback-view` | The semantic side fails; keyword hits pass through | Failure behavior |
@@ -85,6 +86,7 @@ Section names refer to [../architecture.md](../architecture.md).
 | `passages` | `includes/Passage_Builder.php` (chunk text or `stale` excerpt) |
 | `indexability` | `includes/Indexability.php` (`wpai_embedding_sync_is_indexable`) |
 | `adapter` | `includes/Ai_Adapter.php`; the "boundary" badge is the dependency rule that only it calls the `ai` plugin |
+| `ai-listener`, `ai-queue`, `ai-worker`, `ai-source`, `ai-chunker` | The `ai` plugin's `Embeddings/Sync` classes; `Object_Processor::process()` calls `Post_Source::get_text()`, `Text_Chunker::chunk()`, the embedding client and `store_for_object()` |
 | `ai-sync`, `ai-repo` | The `ai` plugin's `Embedding_Sync` and embedding repository, as used by `Ai_Adapter` |
 | `provider` | Embedding provider reached through the AI Client and Connectors |
 | Edge `engine-hybrid`, `rest-hybrid` | `loupe_search_order_results`, `loupe_search_advanced_hits` (Front-end and REST flows) |
