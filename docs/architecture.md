@@ -214,7 +214,9 @@ the keyword hits unchanged.
 
 | Failure | Behavior |
 | --- | --- |
-| No model saved, empty query after normalization, no post types | Keyword hits unchanged; `Retriever::search()` returns `WP_Error` `loupe_semantic_no_model` for abilities and CLI |
+| No model saved | Keyword hits unchanged; for abilities and CLI, `Retriever::search()` returns `WP_Error` `loupe_semantic_no_model` |
+| Empty query after normalization | Keyword hits unchanged; abilities and CLI get `WP_Error` `loupe_semantic_empty_query` (from `Abilities::execute_retrieve()` or `Query_Embedder::embed()`) |
+| No post types (model saved) | Keyword hits unchanged; `Retriever::search()` returns an empty array, not an error |
 | Rate limit or daily cap reached | `WP_Error` `loupe_semantic_rate_limited`; keyword hits unchanged |
 | Provider error or timeout (1.5 s) | `WP_Error` `loupe_semantic_embedding_failed`; not cached; keyword hits unchanged |
 | `matches_filter` throws | Keyword hits unchanged |
@@ -246,7 +248,10 @@ concurrent requests can exceed a limit slightly.
 ## Scale
 
 `Ai_Repository_Vector_Store` reads every vector of the target model in batches of 200 and computes
-cosine similarity in PHP on each uncached search. It is practical up to about 20,000 chunks. A faster
+cosine similarity in PHP on every semantic search, including REST searches, passage retrieval, and
+queries whose vector comes from the query-vector cache. That cache saves only the embedding call. Only
+Loupe's own front-end result cache skips the scan, because a cached result never reaches
+`Retriever::search()`. The store is practical up to about 20,000 chunks. A faster
 backend can replace it through the `loupe_semantic_vector_store` filter by returning a `Vector_Store`.
 
 ## Where to make changes
