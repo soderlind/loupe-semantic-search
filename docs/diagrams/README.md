@@ -9,8 +9,8 @@ pins `main` at `4cd8284` (the 0.1.1 code the architecture document describes).
 | --- | --- |
 | [build-graph.mjs](build-graph.mjs) | Source of truth: lanes, nodes, edges, flows and views |
 | [graph.json](graph.json) | Generated PR Lens graph document |
-| [render.mjs](render.mjs) | Validates the graph and renders each view in light and dark, with the palette overrides applied |
-| [palette.mjs](palette.mjs) | Colour overrides for the renderer palette, chosen to meet WCAG 2.2 contrast |
+| [render.mjs](render.mjs) | Validates the graph and renders each view in light and dark, with the GitHub theme colours applied |
+| [palette.mjs](palette.mjs) | GitHub Light/Dark Default colours applied to the rendered SVGs, chosen to meet WCAG 2.2 contrast |
 | [check-contrast.mjs](check-contrast.mjs) | Prints the contrast of each colour pair; exits 1 if a required pair fails |
 | `img/*.svg` | Canonical diagrams (self-contained, animated flows) |
 | `img/*.png` | Static copies of the SVGs |
@@ -34,19 +34,32 @@ not draw them, so put anything a reader must see into the label.
 
 ## Colour and contrast
 
-The renderer has no palette option, so `palette.mjs` swaps colours in each SVG after rendering.
-Its defaults fail three checks, and the overrides fix them:
+The renderer draws in greys and has no palette option, so `palette.mjs` recolours each SVG after
+rendering. The colours come from the VS Code themes GitHub Light Default and GitHub Dark Default
+([primer/github-vscode-theme](https://github.com/primer/github-vscode-theme), `@primer/primitives`
+7.10.0). Each diagram element takes the colour of a matching syntax role:
 
-| Pair | Requirement | Light | Dark |
-| --- | --- | --- | --- |
-| Muted subtitle on faded (0.82) sequence participant | 4.5:1 (1.4.3) | 4.09 → 4.80 (`#4d5560`) | 4.18 → 4.97 (`#a0a8b1`) |
-| Edge arrows on background | 3:1 (1.4.11) | 2.78 → 3.42 (`#7d8590`) | 4.12, unchanged |
-| Sequence lifelines on background | 3:1 (1.4.11) | 1.31 → 3.09 (`#848d97`) | 1.55 → 3.16 (`#5c646e`) |
+| Element | Syntax role | Light | Dark | Lowest ratio (light / dark) |
+| --- | --- | --- | --- | --- |
+| Node title | function name | `#6639ba` | `#d2a8ff` | 4.91 / 6.03 (faded card) |
+| Node subtitle | constant | `#0550ae` | `#79c0ff` | 5.09 / 6.04 (faded card) |
+| Edge label | string | `#0a3069` | `#a5d6ff` | 12.81 / 12.31 |
+| Lane label | keyword | `#cf222e` | `#ff7b72` | 4.91 / 7.06 |
+| "boundary" badge | keyword, one step stronger | `#a40e26` | `#ffa198` | 5.32 / 5.16 (faded chip) |
+| Node icon | variable | `#953800` | `#ffa657` | 4.59 / 5.17 (faded chip, 3:1 required) |
+| Edges, arrowheads, flow dots | link accent | `#0969da` | `#58a6ff` | 4.76 / 7.05 (3:1 required) |
+| Sequence lifelines | comment | `#6e7781` | `#8b949e` | 4.17 / 4.12 (3:1 required) |
 
-All other text is between 5.2:1 and 15.8:1. Card borders stay light (1.3:1 and 1.9:1). They are
-decorative: each card is identified by its label, icon and shadow. After a renderer upgrade, run
-`node check-contrast.mjs` and confirm the new SVGs no longer contain the default colours, because
-the overrides replace exact colour values.
+Text needs 4.5:1 (WCAG 1.4.3), and edges, icons and lifelines need 3:1 (1.4.11). Context
+participants in sequence views are drawn at 0.82 opacity, so text is also checked against the
+faded card. Two shades are a step stronger than the theme uses: light titles take purple[6]
+(purple[5] `#8250df` gives 3.67:1 on a faded card), and the badge uses a deeper red than lane
+labels for the same reason.
+
+Card borders stay light (1.3:1 and 1.9:1). They are decorative: each card is identified by its
+label, icon and shadow. After a renderer upgrade, run `node check-contrast.mjs` and confirm the
+new SVGs no longer contain the renderer greys, because `palette.mjs` matches the renderer's exact
+edge colour and its class names (`ntitle`, `nsub`, `ltext`, `lanelabel`, `glyph`, `lifeline`, `bdg-neutral`).
 
 ## Source map
 
