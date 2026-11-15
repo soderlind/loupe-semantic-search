@@ -8,6 +8,8 @@ All notable changes to this project are documented in this file.
 
 - Semantic hits and RAG passages respect Loupe Search index partitions: a post is dropped when its
   partition isn't searched, so with Loupe Search Multilingual results stay in the current language.
+  When many top matches are out of scope, more candidates are fetched so in-scope matches aren't missed.
+- Post types a search skips through `loupe_search_query_partitions` are skipped by semantic search too.
 
 ## [0.1.2] - 2026-11-14
 

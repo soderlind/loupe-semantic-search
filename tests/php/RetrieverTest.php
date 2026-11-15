@@ -14,7 +14,7 @@ require_once __DIR__ . '/stubs/WP_Loupe_Partitions.php';
 
 class RetrieverTest extends TestCase {
 
-	private function retriever(): Retriever {
+	private function retriever( ?Vector_Store $store = null ): Retriever {
 		$embedder = $this->createStub( Query_Embedder::class );
 		$embedder->method( 'embed' )->willReturn( [ 0.1, 0.2 ] );
 
@@ -25,8 +25,10 @@ class RetrieverTest extends TestCase {
 			'score'       => $score,
 			'hash'        => 'h' . $id,
 		];
-		$store = $this->createStub( Vector_Store::class );
-		$store->method( 'search' )->willReturn( [ $match( 1, 0.9 ), $match( 2, 0.8 ), $match( 3, 0.7 ) ] );
+		if ( null === $store ) {
+			$store = $this->createStub( Vector_Store::class );
+			$store->method( 'search' )->willReturn( [ $match( 1, 0.9 ), $match( 2, 0.8 ), $match( 3, 0.7 ) ] );
+		}
 
 		return new Retriever( $embedder, $store, $this->createStub( Passage_Builder::class ) );
 	}
@@ -53,7 +55,7 @@ class RetrieverTest extends TestCase {
 		$this->assertSame( [ 1 ], $this->ids( $this->retriever()->search( 'q', 10, [ 'post' ], true ) ) );
 	}
 
-	public function test_drops_posts_outside_the_partitions_searched(): void {
+	private function stub_get_post(): void {
 		Functions\when( 'get_post' )->alias(
 			static function ( $id ) {
 				$post            = new \WP_Post();
@@ -62,11 +64,41 @@ class RetrieverTest extends TestCase {
 				return $post;
 			}
 		);
+	}
+
+	public function test_drops_posts_outside_the_partitions_searched(): void {
+		$this->stub_get_post();
 		// E.g. Loupe Search Multilingual: the visitor reads German, post 1 is English.
 		WP_Loupe_Partitions::$searched        = [ 'post' => [ 'de' ] ];
 		WP_Loupe_Partitions::$post_partitions = [ 1 => 'en', 2 => 'de' ];
 
 		$this->assertSame( [ 2 ], $this->ids( $this->retriever()->search( 'q', 10, [ 'post' ], false ) ) );
+	}
+
+	public function test_asks_the_store_for_more_until_enough_matches_are_in_scope(): void {
+		$this->stub_get_post();
+		// Twenty English posts rank above the only German one.
+		$ranked = [];
+		for ( $id = 10; $id <= 30; $id++ ) {
+			$ranked[] = [ 'post_id' => $id, 'post_type' => 'post', 'chunk_index' => 0, 'score' => 1 - $id / 100, 'hash' => 'h' ];
+		}
+		$store = $this->createMock( Vector_Store::class );
+		$store->expects( $this->exactly( 2 ) )->method( 'search' )
+			->willReturnCallback( static fn ( $vector, $target, int $k ): array => array_slice( $ranked, 0, $k ) );
+		WP_Loupe_Partitions::$searched        = [ 'post' => [ 'de' ] ];
+		WP_Loupe_Partitions::$post_partitions = array_fill_keys( range( 10, 29 ), 'en' ) + [ 30 => 'de' ];
+
+		$this->assertSame( [ 30 ], $this->ids( $this->retriever( $store )->search( 'q', 1, [ 'post' ], false ) ) );
+	}
+
+	public function test_skips_post_types_the_search_excludes(): void {
+		WP_Loupe_Partitions::$searched = [ 'post' => [] ];
+		$store                         = $this->createMock( Vector_Store::class );
+		$store->expects( $this->once() )->method( 'search' )
+			->with( $this->anything(), $this->anything(), $this->anything(), [ 'page' ] )
+			->willReturn( [ [ 'post_id' => 1, 'post_type' => 'post', 'chunk_index' => 0, 'score' => 0.9, 'hash' => 'h' ] ] );
+
+		$this->assertSame( [], $this->retriever( $store )->search( 'q', 10, [ 'post', 'page' ], false ) );
 	}
 
 	public function test_without_public_only_keeps_private_posts(): void {

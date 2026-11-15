@@ -7,15 +7,11 @@ namespace Soderlind\Plugin\LoupeSearch;
 
 class WP_Loupe_Partitions {
 
-	/** @var array<string,list<string>> Post type => partitions searched. Unlisted types are unpartitioned. */
+	/** @var array<string,list<string>> Post type => partitions searched. Unlisted types are unpartitioned and fully searched. */
 	public static array $searched = [];
 
 	/** @var array<int,string> Post ID => partition. */
 	public static array $post_partitions = [];
-
-	public static function is_partitioned( string $post_type ): bool {
-		return isset( self::$searched[ $post_type ] );
-	}
 
 	public static function for_query( string $post_type ): array {
 		return self::$searched[ $post_type ] ?? [ '' ];

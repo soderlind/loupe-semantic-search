@@ -47,53 +47,74 @@ class Retriever {
 			return [];
 		}
 
+		$scopes     = array_filter( self::partition_scopes( $post_types ), static fn ( ?array $scope ): bool => [] !== $scope );
+		$post_types = array_keys( $scopes );
+		if ( empty( $post_types ) ) {
+			return [];
+		}
+
 		$target = Settings::target();
 		$vector = $this->embedder->embed( $query, $target );
 		if ( is_wp_error( $vector ) ) {
 			return $vector;
 		}
 
-		// Ask for more than needed: some matches are dropped by the checks below.
-		$matches = $this->store->search( $vector, $target, $limit * 3 + 10, $post_types, (float) Settings::get( 'min_similarity' ) );
-		$allowed = array_flip( $post_types );
-		$scopes  = self::partition_scopes( $post_types );
+		// Ask for more than needed, since some matches are dropped by the checks below,
+		// and ask again for more until enough are kept or the store has no more.
+		$k       = $limit * 3 + 10;
+		$checked = 0;
 		$out     = [];
-		foreach ( $matches as $match ) {
-			$id = (int) $match['post_id'];
-			if ( ! isset( $allowed[ $match['post_type'] ] ) || ! \loupe_search_is_post_indexable( $id ) ) {
-				continue;
+		while ( true ) {
+			$matches = $this->store->search( $vector, $target, $k, $post_types, (float) Settings::get( 'min_similarity' ) );
+			foreach ( array_slice( $matches, $checked ) as $match ) {
+				if ( $this->keep( $match, $scopes, $public_only ) ) {
+					$out[ (int) $match['post_id'] ] = $match;
+					if ( count( $out ) >= $limit ) {
+						return array_values( $out );
+					}
+				}
 			}
-			if ( isset( $scopes[ $match['post_type'] ] ) && ! self::in_scope( $id, $scopes[ $match['post_type'] ] ) ) {
-				continue;
+			if ( count( $matches ) < $k ) {
+				return array_values( $out );
 			}
-			if ( $public_only && ! \Soderlind\Plugin\LoupeSearch\WP_Loupe_Utils::is_publicly_viewable_post( $id ) ) {
-				continue;
-			}
-			$out[] = $match;
-			if ( count( $out ) >= $limit ) {
-				break;
-			}
+			$checked = count( $matches );
+			$k      *= 4;
 		}
-		return $out;
 	}
 
 	/**
-	 * Partitions each partitioned post type's search covers, e.g. only the current
-	 * language with Loupe Search Multilingual (Loupe Search 1.6.0+).
+	 * Whether a store match may be returned.
+	 *
+	 * @param array{post_id:int,post_type:string} $match       Store match.
+	 * @param array<string,?list<string>>         $scopes      Post type => partitions searched, null for all.
+	 * @param bool                                $public_only Only posts the public can view.
+	 */
+	private function keep( array $match, array $scopes, bool $public_only ): bool {
+		$id = (int) $match['post_id'];
+		if ( ! array_key_exists( $match['post_type'], $scopes ) || ! \loupe_search_is_post_indexable( $id ) ) {
+			return false;
+		}
+		$scope = $scopes[ $match['post_type'] ];
+		if ( null !== $scope && ! self::in_scope( $id, $scope ) ) {
+			return false;
+		}
+		return ! $public_only || \Soderlind\Plugin\LoupeSearch\WP_Loupe_Utils::is_publicly_viewable_post( $id );
+	}
+
+	/**
+	 * Partitions each post type's search covers, e.g. only the current language
+	 * with Loupe Search Multilingual (Loupe Search 1.6.0+), so semantic hits match keyword hits.
 	 *
 	 * @param list<string> $post_types Post types.
-	 * @return array<string,list<string>> Post type => partitions searched; unpartitioned types are left out.
+	 * @return array<string,?list<string>> Post type => partitions searched; null when unrestricted,
+	 *                                     an empty list when the search skips the type.
 	 */
 	private static function partition_scopes( array $post_types ): array {
 		$partitions = \Soderlind\Plugin\LoupeSearch\WP_Loupe_Partitions::class;
-		if ( ! class_exists( $partitions ) ) {
-			return [];
-		}
-		$scopes = [];
+		$scopes     = [];
 		foreach ( $post_types as $post_type ) {
-			if ( $partitions::is_partitioned( $post_type ) ) {
-				$scopes[ $post_type ] = $partitions::for_query( $post_type );
-			}
+			$scope                = class_exists( $partitions ) ? $partitions::for_query( $post_type ) : [ '' ];
+			$scopes[ $post_type ] = [ '' ] === $scope ? null : $scope;
 		}
 		return $scopes;
 	}
