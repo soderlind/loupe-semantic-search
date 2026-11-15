@@ -21,3 +21,11 @@ if ( ! class_exists( 'WP_Error' ) ) {
 		}
 	}
 }
+
+if ( ! class_exists( 'WP_Post' ) ) {
+	// phpcs:ignore Generic.Files.OneObjectStructurePerFile
+	final class WP_Post {
+		public int $ID          = 0;
+		public string $post_type = 'post';
+	}
+}

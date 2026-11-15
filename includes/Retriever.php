@@ -56,10 +56,14 @@ class Retriever {
 		// Ask for more than needed: some matches are dropped by the checks below.
 		$matches = $this->store->search( $vector, $target, $limit * 3 + 10, $post_types, (float) Settings::get( 'min_similarity' ) );
 		$allowed = array_flip( $post_types );
+		$scopes  = self::partition_scopes( $post_types );
 		$out     = [];
 		foreach ( $matches as $match ) {
 			$id = (int) $match['post_id'];
 			if ( ! isset( $allowed[ $match['post_type'] ] ) || ! \loupe_search_is_post_indexable( $id ) ) {
+				continue;
+			}
+			if ( isset( $scopes[ $match['post_type'] ] ) && ! self::in_scope( $id, $scopes[ $match['post_type'] ] ) ) {
 				continue;
 			}
 			if ( $public_only && ! \Soderlind\Plugin\LoupeSearch\WP_Loupe_Utils::is_publicly_viewable_post( $id ) ) {
@@ -71,6 +75,39 @@ class Retriever {
 			}
 		}
 		return $out;
+	}
+
+	/**
+	 * Partitions each partitioned post type's search covers, e.g. only the current
+	 * language with Loupe Search Multilingual (Loupe Search 1.6.0+).
+	 *
+	 * @param list<string> $post_types Post types.
+	 * @return array<string,list<string>> Post type => partitions searched; unpartitioned types are left out.
+	 */
+	private static function partition_scopes( array $post_types ): array {
+		$partitions = \Soderlind\Plugin\LoupeSearch\WP_Loupe_Partitions::class;
+		if ( ! class_exists( $partitions ) ) {
+			return [];
+		}
+		$scopes = [];
+		foreach ( $post_types as $post_type ) {
+			if ( $partitions::is_partitioned( $post_type ) ) {
+				$scopes[ $post_type ] = $partitions::for_query( $post_type );
+			}
+		}
+		return $scopes;
+	}
+
+	/**
+	 * Whether a post's partition is one of those searched, so semantic hits match keyword hits.
+	 *
+	 * @param int          $post_id  Post ID.
+	 * @param list<string> $searched Partitions searched.
+	 */
+	private static function in_scope( int $post_id, array $searched ): bool {
+		$post = get_post( $post_id );
+		return $post instanceof \WP_Post
+			&& in_array( \Soderlind\Plugin\LoupeSearch\WP_Loupe_Partitions::for_post( $post ), $searched, true );
 	}
 
 	/**

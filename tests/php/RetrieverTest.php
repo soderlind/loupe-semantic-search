@@ -2,6 +2,7 @@
 namespace Soderlind\Plugin\LoupeSemanticSearch\Tests;
 
 use Brain\Monkey\Functions;
+use Soderlind\Plugin\LoupeSearch\WP_Loupe_Partitions;
 use Soderlind\Plugin\LoupeSearch\WP_Loupe_Utils;
 use Soderlind\Plugin\LoupeSemanticSearch\Passage_Builder;
 use Soderlind\Plugin\LoupeSemanticSearch\Query_Embedder;
@@ -9,6 +10,7 @@ use Soderlind\Plugin\LoupeSemanticSearch\Retriever;
 use Soderlind\Plugin\LoupeSemanticSearch\Vector_Store;
 
 require_once __DIR__ . '/stubs/WP_Loupe_Utils.php';
+require_once __DIR__ . '/stubs/WP_Loupe_Partitions.php';
 
 class RetrieverTest extends TestCase {
 
@@ -37,7 +39,9 @@ class RetrieverTest extends TestCase {
 	}
 
 	protected function tearDown(): void {
-		WP_Loupe_Utils::$private_ids = [];
+		WP_Loupe_Utils::$private_ids         = [];
+		WP_Loupe_Partitions::$searched        = [];
+		WP_Loupe_Partitions::$post_partitions = [];
 		parent::tearDown();
 	}
 
@@ -47,6 +51,22 @@ class RetrieverTest extends TestCase {
 
 	public function test_public_only_drops_posts_the_public_cannot_view(): void {
 		$this->assertSame( [ 1 ], $this->ids( $this->retriever()->search( 'q', 10, [ 'post' ], true ) ) );
+	}
+
+	public function test_drops_posts_outside_the_partitions_searched(): void {
+		Functions\when( 'get_post' )->alias(
+			static function ( $id ) {
+				$post            = new \WP_Post();
+				$post->ID        = (int) $id;
+				$post->post_type = 'post';
+				return $post;
+			}
+		);
+		// E.g. Loupe Search Multilingual: the visitor reads German, post 1 is English.
+		WP_Loupe_Partitions::$searched        = [ 'post' => [ 'de' ] ];
+		WP_Loupe_Partitions::$post_partitions = [ 1 => 'en', 2 => 'de' ];
+
+		$this->assertSame( [ 2 ], $this->ids( $this->retriever()->search( 'q', 10, [ 'post' ], false ) ) );
 	}
 
 	public function test_without_public_only_keeps_private_posts(): void {

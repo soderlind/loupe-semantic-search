@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Semantic hits and RAG passages respect Loupe Search index partitions: a post is dropped when its
+  partition isn't searched, so with Loupe Search Multilingual results stay in the current language.
+
 ## [0.1.2] - 2026-11-14
 
 ### Added
