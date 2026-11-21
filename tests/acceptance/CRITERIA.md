@@ -55,7 +55,7 @@ also found by keyword search, so they check hybrid ranking, not semantics alone.
 | --- | --- | --- | --- | --- | --- |
 | AC-08 | Anonymous | A page with the Loupe Search Block; REST hybrid on | Searches "søvnløshet" in the block | "Bedre søvn med faste rutiner" is among the results | `Hybrid_Search::filter_advanced_hits` |
 | AC-09 | Anonymous | REST hybrid on | `POST /search` with `semantic:false` | The semantic-only post is not returned | `$context['payload']['semantic']` |
-| AC-10 | Anonymous | A page with the block | Searches "søvnløshet" sorted "Tittel A–Z" | The semantic-only post is not among the results | `Hybrid_Search::is_relevance_sort` |
+| AC-10 | Anonymous | A page with the block | Searches "søvnløshet" sorted "Tittel A–Z" | The semantic-only post is among the results | `Hybrid_Search::sort_by_fields` |
 
 ## J4 Abilities
 

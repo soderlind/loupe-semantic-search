@@ -110,7 +110,8 @@ A backfill is started from the settings tab, by `wp loupe-semantic backfill`, or
 1. Loupe's `WP_Loupe_Search_Engine::search()` merges keyword hits and applies
    `loupe_search_order_results( $hits, $query, $post_types, $sort )`.
 2. `Hybrid_Search::filter_order_results()` returns the hits unchanged when the `hybrid_frontend`
-   setting is off, a field sort is applied, or the hits are already fused (`_hybrid` flag).
+   setting is off or the hits are already fused (`_hybrid` flag). With a field sort, the fused hits
+   are reordered by `Hybrid_Search::sort_by_fields()`.
 3. `Hybrid_Search::hybridize()` asks `Retriever::search()` for `loupe_semantic_candidates` matches (default 50).
 4. `Retriever::search()`:
    1. `Query_Embedder::embed()` strips Loupe operators (quotes, `-term`, `OR`) and lowercases the query.
@@ -143,7 +144,8 @@ When the semantic side fails, the keyword hits pass through unchanged (see [Fail
    and before pagination. `$context` carries `post_types`, `filter`, `sort`, `payload`, `limit` and
    the callable `matches_filter`.
 2. `Hybrid_Search::filter_advanced_hits()` skips when `hybrid_rest` is off, the payload has
-   `semantic: false`, or the sort is not relevance (`Hybrid_Search::is_relevance_sort()`).
+   `semantic: false`, or the sort is by distance or relevance ascending (`Hybrid_Search::is_fusable_sort()`).
+   Field sorts are applied to the fused hits by `Hybrid_Search::sort_by_fields()`.
 3. As in the front-end flow, plus: when the request has a filter, semantic-only IDs are passed to
    `matches_filter` and dropped unless Loupe says they match the filter.
 4. Loupe drops hits of unsearched post types, raises `totalHits` by the hits added, paginates, and
@@ -235,7 +237,7 @@ There are no retries in the add-on. Embedding retries and backoff during indexin
 | Abilities and CLI passages return only publicly viewable posts | `Retriever::passages()` with `public_only`; `Abilities::execute_search()` | `RetrieverTest` |
 | The veto never removes content another `ai` consumer needs | `Indexability::filter()` skips post types covered by another consumer | `IndexabilityTest::test_leaves_shared_post_types_to_other_consumers` |
 | A query with `-term` never gains hits from the semantic side | `Query_Embedder::has_exclusion()` → `merge( …, $rerank_only )` | `Hybrid_SearchTest::test_merge_rerank_only_adds_nothing`, `test_rest_exclusion_query_reranks_only` |
-| Explicit field sorts and `semantic: false` keep Loupe's order | `filter_order_results()` / `filter_advanced_hits()` guards | `Hybrid_SearchTest::test_front_end_skips_field_sorts_and_disabled_toggle`, `test_rest_skips_on_opt_out_and_on_non_relevance_sort`; AC-09, AC-10 |
+| Field sorts order the fused hits; distance sorts and `semantic: false` keep Loupe's order | `filter_order_results()` / `filter_advanced_hits()`, `sort_by_fields()` | `Hybrid_SearchTest::test_front_end_field_sort_keeps_semantic_hits_and_sorts_them`, `test_rest_field_sort_returns_semantic_only_hits_sorted`, `test_rest_skips_on_opt_out_relevance_asc_and_distance_sort`; AC-09, AC-10 |
 | REST semantic-only hits respect the request filter | `matches_filter` in `hybridize()` | `Hybrid_SearchTest::test_rest_drops_semantic_only_hits_outside_the_filter` |
 | Hits are fused at most once per request | `_hybrid` flag, `already_hybrid()` | `Hybrid_SearchTest::test_already_fused_hits_are_left_alone` |
 | Only uncached query embeddings count against limits; administrators and WP-CLI skip the per-IP limit, never the daily cap | `Query_Embedder::embed()` checks the cache first; `Rate_Limiter::is_exempt()` | `Query_EmbedderTest`, `Rate_LimiterTest` |

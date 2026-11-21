@@ -5,7 +5,7 @@ Requires at least: 7.0.3
 Tested up to: 7.1
 Requires PHP: 8.3
 Requires Plugins: loupe-search, ai
-Stable tag: 0.1.3
+Stable tag: 0.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,6 +39,9 @@ Any provider connected under Settings → Connectors that offers embedding model
 Yes. The title and content of every post Loupe Search indexes, and every search query, are sent to the connected provider to create embeddings.
 
 == Changelog ==
+
+= 0.2.0 =
+* Fixed: sorting hybrid results by date or title keeps the posts found by meaning. The same results are shown, ordered by that field, instead of "No results" when nothing matched the keywords. Distance sorts still return keyword results only.
 
 = 0.1.3 =
 * Fixed: semantic hits and RAG passages now stay in the index partitions being searched, so with Loupe Search Multilingual they stay in the current language.

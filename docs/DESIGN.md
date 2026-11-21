@@ -134,9 +134,10 @@ Stored records contain vectors, not text. For the top hits only:
 | Abilities | own registration | on once a model is chosen |
 
 - A REST request can opt out with `semantic: false`.
-- Hybrid is skipped when the request sorts explicitly by a field other than `_score`, or by geo
-  distance: the caller asked for that order, not relevance. The front-end filter gets the applied
-  field sort as its fourth argument for the same check.
+- A field sort (other than `_score`) keeps the hybrid result set and orders it by that field, so
+  changing the sort never changes which results are shown. Semantic-only hits read the field from
+  the post (property, else post meta). The front-end filter gets the applied field sort as its
+  fourth argument. Hybrid is skipped for geo-distance sorts (semantic-only hits have no coordinates).
 - REST filters: semantic-only hits are kept only if the context's `matches_filter` callback
   returns them. Loupe runs the request's own filter string as an empty-query search, so every
   filter Loupe supports (taxonomies, custom fields, dates, geo) applies. Loupe caps that lookup at

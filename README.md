@@ -54,7 +54,8 @@ Details:
 
 - Quotes, `-term` and `OR` are removed before the query is embedded. A query with an exclusion
   (`-term`) only reorders keyword hits, so excluded words never return through meaning.
-- Hybrid is skipped when results are sorted by a field or by distance.
+- Field sorts (date, title, …) show the same hybrid results, ordered by that field. Hybrid is
+  skipped when results are sorted by distance.
 - REST filters (taxonomies, fields, dates, geo) also apply to posts found by meaning.
 - Facet counts are computed from keyword hits only.
 - A REST request can opt out with `"semantic": false`.
