@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.2.0] - 2026-11-21
+
+### Fixed
+
+- Sorting hybrid results by a field (newest, oldest, title) no longer drops the posts found by meaning:
+  the same results are shown, ordered by that field. Before, a query with no keyword matches showed
+  "No results" as soon as a sort was chosen. Distance sorts still return keyword results only.
+
 ## [0.1.3] - 2026-11-15
 
 ### Fixed
