@@ -205,7 +205,9 @@ class Hybrid_Search {
 	}
 
 	/**
-	 * A post's value for a Loupe field: a post property, else post meta.
+	 * A post's value for a Loupe field, as Loupe Search indexes it
+	 * (`WP_Loupe_Indexer::prepare_document()`): a post property passed through
+	 * `loupe_search_field_{$field}`, else post meta; then normalized.
 	 *
 	 * @param int    $post_id Post ID.
 	 * @param string $field   Loupe field name.
@@ -217,10 +219,32 @@ class Hybrid_Search {
 			return null;
 		}
 		if ( property_exists( $post, $field ) ) {
-			return $post->{$field};
+			$value = apply_filters( "loupe_search_field_{$field}", $post->{$field} );
+		} else {
+			$value = get_post_meta( $post_id, $field, true );
 		}
-		$meta = get_post_meta( $post_id, $field, true );
-		return ( '' === $meta || false === $meta ) ? null : $meta;
+		return self::normalize_field_value( $value );
+	}
+
+	/**
+	 * Normalize a field value like Loupe Search's indexer: empty values and
+	 * whitespace-only strings become null, strings are trimmed.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return mixed
+	 */
+	private static function normalize_field_value( $value ) {
+		if ( null === $value || '' === $value || [] === $value || false === $value ) {
+			return null;
+		}
+		if ( is_numeric( $value ) ) {
+			return $value;
+		}
+		if ( is_string( $value ) ) {
+			$value = trim( $value );
+			return '' === $value ? null : $value;
+		}
+		return $value;
 	}
 
 	/**

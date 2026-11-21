@@ -3,6 +3,7 @@ namespace Soderlind\Plugin\LoupeSemanticSearch\Tests;
 
 use Soderlind\Plugin\LoupeSemanticSearch\Hybrid_Search;
 use Soderlind\Plugin\LoupeSemanticSearch\Retriever;
+use Brain\Monkey\Filters;
 use Brain\Monkey\Functions;
 
 class Hybrid_SearchTest extends TestCase {
@@ -82,6 +83,29 @@ class Hybrid_SearchTest extends TestCase {
 	public function test_front_end_disabled_toggle_keeps_keyword_hits(): void {
 		$this->settings( [ 'provider' => 'openai', 'model' => 'small', 'hybrid_frontend' => false ] );
 		$this->assertSame( self::KEYWORD, $this->hybrid( [], 0 )->filter_order_results( self::KEYWORD, 'fruit', [ 'post' ], [] ) );
+	}
+
+	public function test_sort_by_fields_resolves_semantic_values_like_the_indexer(): void {
+		Functions\when( 'get_post' )->alias(
+			static function ( $id ) {
+				$post             = new \WP_Post();
+				$post->ID         = $id;
+				$post->post_title = [ 7 => 'The Zebra', 8 => 'Mango' ][ $id ];
+				return $post;
+			}
+		);
+		Filters\expectApplied( 'loupe_search_field_post_title' )->andReturnUsing( static fn ( $t ) => preg_replace( '/^The /', '', $t ) );
+		Functions\when( 'get_post_meta' )->alias( static fn ( $id ) => [ 7 => '   ', 8 => ' 5 ' ][ $id ] );
+
+		$hits = [ [ 'id' => 7, 'post_type' => 'post' ], [ 'id' => 8, 'post_type' => 'post' ] ];
+
+		$by_title = Hybrid_Search::sort_by_fields( $hits, [ [ 'post_title', 'asc' ] ] );
+		$this->assertSame( [ 8, 7 ], array_column( $by_title, 'id' ), '"The Zebra" sorts as "Zebra".' );
+		$this->assertSame( 'Zebra', $by_title[1]['post_title'] );
+
+		$by_meta = Hybrid_Search::sort_by_fields( $hits, [ [ 'price', 'desc' ] ] );
+		$this->assertSame( [ 8, 7 ], array_column( $by_meta, 'id' ), 'Whitespace-only meta is missing and sorts last.' );
+		$this->assertNull( $by_meta[1]['price'] );
 	}
 
 	public function test_sort_by_fields_puts_missing_values_last_in_both_directions(): void {
