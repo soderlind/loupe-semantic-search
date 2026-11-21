@@ -3,6 +3,7 @@ namespace Soderlind\Plugin\LoupeSemanticSearch\Tests;
 
 use Soderlind\Plugin\LoupeSemanticSearch\Hybrid_Search;
 use Soderlind\Plugin\LoupeSemanticSearch\Retriever;
+use Brain\Monkey\Functions;
 
 class Hybrid_SearchTest extends TestCase {
 
@@ -47,13 +48,51 @@ class Hybrid_SearchTest extends TestCase {
 		$this->assertSame( [ 1, 7, 2 ], array_column( $hits, 'id' ) );
 	}
 
-	public function test_front_end_skips_field_sorts_and_disabled_toggle(): void {
-		$hybrid = $this->hybrid( [], 0 );
-		$sorted = [ [ 'field' => 'post_date', 'direction' => 'desc' ] ];
-		$this->assertSame( self::KEYWORD, $hybrid->filter_order_results( self::KEYWORD, 'fruit', [ 'post' ], $sorted ) );
+	private function stub_posts( array $dates ): void {
+		Functions\when( 'get_post' )->alias(
+			static function ( $id ) use ( $dates ) {
+				if ( ! isset( $dates[ $id ] ) ) {
+					return null;
+				}
+				$post            = new \WP_Post();
+				$post->ID        = $id;
+				$post->post_date = $dates[ $id ];
+				return $post;
+			}
+		);
+		Functions\when( 'get_post_meta' )->justReturn( '' );
+	}
 
+	public function test_front_end_field_sort_keeps_semantic_hits_and_sorts_them(): void {
+		$this->stub_posts( [ 7 => '2024-06-01 00:00:00' ] );
+		$keyword = [
+			[ 'id' => 1, 'post_type' => 'post', '_score' => 0.9, 'post_date' => '2024-01-01 00:00:00' ],
+			[ 'id' => 2, 'post_type' => 'post', '_score' => 0.5, 'post_date' => '2024-03-01 00:00:00' ],
+		];
+		$hybrid = $this->hybrid( [ self::match( 7, 0.9 ) ], 2 );
+
+		$desc = $hybrid->filter_order_results( $keyword, 'fruit', [ 'post' ], [ [ 'field' => 'post_date', 'direction' => 'desc' ] ] );
+		$this->assertSame( [ 7, 2, 1 ], array_column( $desc, 'id' ) );
+		$this->assertSame( '2024-06-01 00:00:00', $desc[0]['post_date'] );
+
+		$asc = $hybrid->filter_order_results( $keyword, 'fruit', [ 'post' ], [ [ 'field' => 'post_date', 'direction' => 'asc' ] ] );
+		$this->assertSame( [ 1, 2, 7 ], array_column( $asc, 'id' ) );
+	}
+
+	public function test_front_end_disabled_toggle_keeps_keyword_hits(): void {
 		$this->settings( [ 'provider' => 'openai', 'model' => 'small', 'hybrid_frontend' => false ] );
-		$this->assertSame( self::KEYWORD, $hybrid->filter_order_results( self::KEYWORD, 'fruit', [ 'post' ], [] ) );
+		$this->assertSame( self::KEYWORD, $this->hybrid( [], 0 )->filter_order_results( self::KEYWORD, 'fruit', [ 'post' ], [] ) );
+	}
+
+	public function test_sort_by_fields_puts_missing_values_last_in_both_directions(): void {
+		$this->stub_posts( [] );
+		$hits = [
+			[ 'id' => 9, 'post_type' => 'post', 'post_title' => '' ],
+			[ 'id' => 1, 'post_type' => 'post', 'post_title' => 'banana' ],
+			[ 'id' => 2, 'post_type' => 'post', 'post_title' => 'Apple' ],
+		];
+		$this->assertSame( [ 2, 1, 9 ], array_column( Hybrid_Search::sort_by_fields( $hits, [ [ 'post_title', 'asc' ] ] ), 'id' ) );
+		$this->assertSame( [ 1, 2, 9 ], array_column( Hybrid_Search::sort_by_fields( $hits, [ [ 'post_title', 'desc' ] ] ), 'id' ) );
 	}
 
 	public function test_no_model_or_empty_query_keeps_keyword_hits(): void {
@@ -95,13 +134,22 @@ class Hybrid_SearchTest extends TestCase {
 		$this->assertSame( [ 1, 8, 2 ], array_column( $hits, 'id' ) );
 	}
 
-	public function test_rest_skips_on_opt_out_and_on_non_relevance_sort(): void {
+	public function test_rest_skips_on_opt_out_relevance_asc_and_distance_sort(): void {
 		$hybrid = $this->hybrid( [], 0 );
 		$base   = [ 'post_types' => [ 'post' ], 'filter' => '', 'payload' => [] ];
 
-		$this->assertSame( self::KEYWORD, $hybrid->filter_advanced_hits( self::KEYWORD, 'fruit', $base + [ 'sort' => [ 'post_date:desc' ] ] ) );
 		$this->assertSame( self::KEYWORD, $hybrid->filter_advanced_hits( self::KEYWORD, 'fruit', [ 'sort' => [], 'payload' => [ 'semantic' => false ] ] + $base ) );
 		$this->assertSame( self::KEYWORD, $hybrid->filter_advanced_hits( self::KEYWORD, 'fruit', $base + [ 'sort' => [ '_relevance:asc' ] ] ) );
+		$this->assertSame( self::KEYWORD, $hybrid->filter_advanced_hits( self::KEYWORD, 'fruit', $base + [ 'sort' => [ '_geoPoint(location, 59.9, 10.7):asc' ] ] ) );
+	}
+
+	public function test_rest_field_sort_returns_semantic_only_hits_sorted(): void {
+		$this->stub_posts( [ 7 => '2024-06-01 00:00:00', 8 => '2023-01-01 00:00:00' ] );
+		$context = [ 'post_types' => [ 'post' ], 'filter' => '', 'sort' => [ 'post_date:desc' ], 'payload' => [], 'limit' => 10 ];
+
+		$hits = $this->hybrid( [ self::match( 8, 0.9 ), self::match( 7, 0.8 ) ] )->filter_advanced_hits( [], 'vacation', $context );
+
+		$this->assertSame( [ 7, 8 ], array_column( $hits, 'id' ) );
 	}
 
 	public function test_rest_exclusion_query_reranks_only(): void {

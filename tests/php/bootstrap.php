@@ -27,5 +27,7 @@ if ( ! class_exists( 'WP_Post' ) ) {
 	final class WP_Post {
 		public int $ID          = 0;
 		public string $post_type = 'post';
+		public string $post_date = '';
+		public string $post_title = '';
 	}
 }

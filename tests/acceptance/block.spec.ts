@@ -39,10 +39,10 @@ test.describe( 'J3 Loupe Search Block and REST', () => {
 		expect( titles ).not.toContain( SEMANTIC_TITLE );
 	} );
 
-	test( 'AC-10 a title sort returns keyword results only', async ( { page } ) => {
+	test( 'AC-10 a title sort keeps semantic results', async ( { page } ) => {
 		await page.goto( pageUrl );
 		await page.getByRole( 'main' ).getByLabel( 'Sorter etter' ).selectOption( { label: 'Tittel A–Z' } );
 		await searchInBlock( page, SEMANTIC_QUERY );
-		await expect( page.getByRole( 'link', { name: SEMANTIC_TITLE } ) ).toHaveCount( 0 );
+		await expect( page.getByRole( 'link', { name: SEMANTIC_TITLE } ) ).toBeVisible();
 	} );
 } );
